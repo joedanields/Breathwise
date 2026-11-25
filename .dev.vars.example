@@ -1,0 +1,12 @@
+# Local secrets/vars for `npm run dev:api` (wrangler pages dev).
+# Copy to .dev.vars (git-ignored) and fill in locally. Never commit real values.
+
+# Required: your Google AI Studio key. Server-side only — never prefix with VITE_.
+GEMINI_API_KEY=
+
+# Model id (not a secret). Overrides [vars] in wrangler.toml.
+GEMINI_MODEL=gemini-3.8-flash
+
+# Optional override. Leave commented out to use the default in wrangler.toml;
+# an empty value would block every origin.
+# ALLOWED_ORIGINS=

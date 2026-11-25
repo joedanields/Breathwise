@@ -1,0 +1,20 @@
+# Cloudflare Pages config — see docs/DEPLOYMENT.md.
+# Never put secrets here. GEMINI_API_KEY is a Cloudflare secret (or .dev.vars locally).
+name = "breathwise"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-11-01"
+
+# Per-IP + daily rate limiting for /api/advise (docs/SECURITY.md §3).
+# TODO(Phase 9): replace both placeholder ids with the real ones from
+#   npx wrangler kv namespace create RATE_LIMIT_KV
+#   npx wrangler kv namespace create RATE_LIMIT_KV --preview
+# Local `wrangler pages dev` simulates KV, so the placeholders work for development.
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "00000000000000000000000000000000"
+preview_id = "00000000000000000000000000000001"
+
+[vars]
+# Latest stable Flash at build time; gemini-3.5-flash-lite is the cheaper fallback (DATA_SOURCES.md §5).
+GEMINI_MODEL = "gemini-3.8-flash"
+ALLOWED_ORIGINS = "https://breathwise.pages.dev,http://localhost:5173,http://localhost:8788"

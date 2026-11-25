@@ -90,6 +90,7 @@ Fields: `city, locality, principalSubdivision, countryCode, countryName`.
 
 - Docs: https://ai.google.dev/gemini-api/docs
 - Models: https://ai.google.dev/gemini-api/docs/models — set `GEMINI_MODEL` to the **latest stable Flash** model listed at build time (e.g. a `gemini-3.x-flash` id). Never hard-code the id outside `shared/config.ts` / env.
+- Current choice: `GEMINI_MODEL = "gemini-3.8-flash"` (`wrangler.toml` `[vars]`, `.dev.vars.example`). **Cheaper fallback:** `gemini-3.5-flash-lite`. Switch to it by changing the var if cost or quota becomes a concern; no code change needed.
 - Endpoint: `POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`
 - Auth header: `x-goog-api-key: <key>` (never in the URL query string).
 - See `AI_DESIGN.md` for body, schema and guards.
