@@ -8,7 +8,7 @@
 | Function | Vitest (call `onRequestPost` with a `Request`) | `functions/api/advise.ts` | All checks in `SECURITY.md §3` |
 | Component | Vitest + React Testing Library + MSW | Feature components & hooks | Key states: loading, success, error, stale, fallback |
 | E2E | Playwright | Critical journeys on built app | 3 browsers (chromium, firefox, webkit) + mobile viewport |
-| Accessibility | `@axe-core/playwright` + `vitest-axe` | Every screen/state | 0 serious/critical |
+| Accessibility | `@axe-core/playwright` + `axe-core` matcher (`tests/a11y/axe.ts`) | Every screen/state | 0 serious/critical |
 | Static | ESLint (jsx-a11y), `tsc --noEmit` | Whole repo | 0 errors |
 
 Overall coverage ≥ 80%. Coverage report uploaded as CI artefact.

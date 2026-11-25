@@ -6,21 +6,21 @@ Work top to bottom. Tick boxes as you go. Each phase ends with `npm run check` g
 
 ## Phase 1 — Scaffold & tooling
 
-- [ ] `npm create vite@latest . -- --template react-ts` (keep existing `docs/`, `README.md`, `CLAUDE.md`)
-- [ ] TS strict + `noUncheckedIndexedAccess`; path aliases `@/` → `src/`, `@shared/` → `shared/`
-- [ ] Tailwind v4 via `@tailwindcss/vite`; design tokens from `UI_UX.md §2`
-- [ ] ESLint (typescript-eslint, react-hooks, jsx-a11y) + Prettier; `no-restricted-imports` rule blocking `tests/**` from runtime dirs
-- [ ] Vitest + RTL + jsdom + MSW + `vitest-axe`; coverage via v8
-- [ ] Playwright + `@axe-core/playwright`
-- [ ] Scripts from `CLAUDE.md` (`dev`, `dev:api`, `build`, `lint`, `typecheck`, `test`, `test:cov`, `e2e`, `check`)
-- [ ] `.gitignore` (node_modules, dist, coverage, playwright-report, test-results, .env*, !.env.example, .dev.vars, .wrangler)
-- [ ] `.env.example`, `.dev.vars.example` (names only)
-- [ ] `.nvmrc` (22)
-- [ ] `wrangler.toml` with `pages_build_output_dir = "dist"`, `compatibility_date`, KV binding `RATE_LIMIT_KV`, `[vars] GEMINI_MODEL`, `ALLOWED_ORIGINS`
-- [ ] Vite `server.proxy` `/api` → `http://localhost:8788`
-- [ ] `public/_headers` from `SECURITY.md §4`
-- [ ] `.github/workflows/ci.yml` from `TESTING.md §7`; Dependabot config
-- [ ] App shell: `Header`, `Footer` (attribution), `SkipLink`, `ErrorBoundary`, theme
+- [x] `npm create vite@latest . -- --template react-ts` (keep existing `docs/`, `README.md`, `CLAUDE.md`)
+- [x] TS strict + `noUncheckedIndexedAccess`; path aliases `@/` → `src/`, `@shared/` → `shared/`
+- [x] Tailwind v4 via `@tailwindcss/vite`; design tokens from `UI_UX.md §2`
+- [x] ESLint (typescript-eslint, react-hooks, jsx-a11y) + Prettier; `no-restricted-imports` rule blocking `tests/**` from runtime dirs
+- [x] Vitest + RTL + jsdom + MSW + axe-core matcher (replaces `vitest-axe`, ADR-009); coverage via v8
+- [x] Playwright + `@axe-core/playwright`
+- [x] Scripts from `CLAUDE.md` (`dev`, `dev:api`, `build`, `lint`, `typecheck`, `test`, `test:cov`, `e2e`, `check`)
+- [x] `.gitignore` (node_modules, dist, coverage, playwright-report, test-results, .env*, !.env.example, .dev.vars, .wrangler)
+- [x] `.env.example`, `.dev.vars.example` (names only)
+- [x] `.nvmrc` (22)
+- [x] `wrangler.toml` with `pages_build_output_dir = "dist"`, `compatibility_date`, KV binding `RATE_LIMIT_KV`, `[vars] GEMINI_MODEL`, `ALLOWED_ORIGINS`
+- [x] Vite `server.proxy` `/api` → `http://localhost:8788`
+- [x] `public/_headers` from `SECURITY.md §4`
+- [x] `.github/workflows/ci.yml` from `TESTING.md §7`; Dependabot config
+- [x] App shell: `Header`, `Footer` (attribution), `SkipLink`, `ErrorBoundary`, theme
 
 **Exit:** blank app builds, lints, tests (1 smoke test) and passes axe on shell; CI green.
 

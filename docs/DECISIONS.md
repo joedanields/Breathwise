@@ -51,3 +51,16 @@ Format: Context → Decision → Consequences. Add new ADRs at the bottom; never
 **Context:** The only chart is a 48-hour band timeline.
 **Decision:** A CSS grid of hour cells plus an accessible table alternative.
 **Consequences:** Smaller bundle and full control over accessibility.
+
+## ADR-009 Toolchain versions and AQI contrast fix
+**Status:** Accepted · 2026-11-25
+**Context:** Phase 1 uses the latest stable dependencies, but several of the newest majors conflict. typescript-eslint 8.74 supports TypeScript < 6.1 (TypeScript 7.0 is out). eslint-plugin-jsx-a11y 6.10 supports ESLint ≤ 9 (ESLint 10 is out). jsdom 31 needs Node ≥ 22.22.2. vitest-axe has had only one release (0.1.0) in years. Separately, two AQI category colours in `UI_UX.md` failed WCAG 4.5:1 with white text: Good `#2E9E4F` (3.43:1) and Very Poor `#E03C31` (4.32:1).
+**Decision:**
+1. Pin TypeScript to the latest 6.0.x (`~6.0.3`).
+2. Use the latest ESLint 9.x (`^9.39.5`) with `@eslint/js` 9.x.
+3. Use jsdom 31 and require Node ≥ 22.22.2 (`"engines"` in `package.json`; `.nvmrc` stays `22`).
+4. Use `axe-core` directly with a small `toHaveNoViolations` matcher in `tests/a11y/axe.ts` instead of vitest-axe.
+5. Darken Good to `#237A3C` (5.36:1) and Very Poor to `#C0302A` (5.68:1), both with white text. All token pairs are verified and recorded in `UI_UX.md §2`.
+
+Dependabot ignores the held-back majors (TypeScript ≥ 6.1, ESLint ≥ 10, `@types/node` ≥ 23).
+**Consequences:** Lint, typecheck and tests run on a supported, compatible set. Revisit when typescript-eslint supports TypeScript 7 and jsx-a11y supports ESLint 10, and then lift the Dependabot ignores. One less unmaintained dependency. The AQI colours meet AA for label text. Swatches still rely on their text label and icon, never colour alone.
