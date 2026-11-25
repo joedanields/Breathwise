@@ -17,20 +17,44 @@
 | `--color-text` | `#0F1A20` | `#E8EEF2` | Body |
 | `--color-muted` | `#55656F` | `#9AABB5` | Secondary text (check ≥ 4.5:1) |
 | `--color-accent` | `#0E7C86` | `#4FC3CC` | Primary actions, focus ring |
-| `--color-border` | `#E2E8EC` | `#26323A` | Dividers |
+| `--color-border` | `#E2E8EC` | `#26323A` | Dividers (decorative only, see note) |
+| `--color-on-accent` | `#FFFFFF` | `#0E1418` | Text/icons on accent-filled buttons |
 
-AQI category tokens (CPCB-inspired hues; text colour chosen for ≥ 4.5:1 contrast):
+AQI category tokens (CPCB-inspired hues; text colour chosen for ≥ 4.5:1 contrast). CSS names: `--color-aqi-<category>` and `--color-on-aqi-<category>`.
 
 | Category | Background | Text on it | Icon |
 |---|---|---|---|
-| Good | `#2E9E4F` | white | `smile` |
+| Good | `#237A3C` | white | `smile` |
 | Satisfactory | `#8CC63F` | `#0F1A20` | `smile-plus` |
 | Moderate | `#F2D21B` | `#0F1A20` | `meh` |
 | Poor | `#F28C28` | `#0F1A20` | `frown` |
-| Very Poor | `#E03C31` | white | `alert-triangle` |
+| Very Poor | `#C0302A` | white | `alert-triangle` |
 | Severe | `#8E1B1B` | white | `octagon-alert` |
 
-Verify every pair with a contrast checker and adjust shades if needed; record final values here.
+### Verified contrast (WCAG 2.x relative luminance, checked 2026-11-25)
+
+Good was `#2E9E4F` (3.43:1 with white) and Very Poor was `#E03C31` (4.32:1 with white). Both failed 4.5:1 and were darkened (ADR-009).
+
+| Pair | Light | Dark | Required |
+|---|---|---|---|
+| text on bg / surface | 16.74 / 17.66 | 15.85 / 14.58 | 4.5 |
+| muted on bg / surface | 5.72 / 6.04 | 7.83 / 7.20 | 4.5 |
+| accent (links, focus ring) on bg / surface | 4.69 / 4.95 | 8.84 / 8.13 | 4.5 text · 3 ring |
+| on-accent on accent (buttons) | 4.95 | 8.84 | 4.5 |
+| border on bg / surface | 1.17 / 1.24 | 1.41 / 1.30 | n/a (decorative) |
+
+| AQI label (text on category bg) | Ratio |
+|---|---|
+| Good: white on `#237A3C` | 5.36 |
+| Satisfactory: `#0F1A20` on `#8CC63F` | 8.63 |
+| Moderate: `#0F1A20` on `#F2D21B` | 11.78 |
+| Poor: `#0F1A20` on `#F28C28` | 7.20 |
+| Very Poor: white on `#C0302A` | 5.68 |
+| Severe: white on `#8E1B1B` | 9.04 |
+
+Notes:
+- **Category swatches vs page background** are below 3:1 for Satisfactory (1.94), Moderate (1.42) and Poor (2.33) in light mode, and Severe (2.05) in dark mode. This is acceptable because a swatch never carries meaning alone: it always contains the category text label (contrast above) and an icon. Do not use a bare colour dot without its label.
+- **`--color-border` is for decorative dividers only.** Form-control boundaries (inputs, checkboxes, selects) need ≥ 3:1 against their background, so use `--color-muted` for those borders.
 
 Typography: `Inter Variable` (UI) self-hosted via `@fontsource-variable/inter`; numeric displays use tabular figures. Base 16 px, scale 1.25.
 

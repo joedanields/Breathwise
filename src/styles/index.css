@@ -1,0 +1,112 @@
+/*
+ * Breathwise design tokens — source of truth: docs/UI_UX.md §2.
+ * Never hard-code colours in components; use these tokens (bg-bg, text-muted,
+ * bg-aqi-poor text-on-aqi-poor, …). Contrast ratios are recorded in UI_UX.md.
+ */
+@import 'tailwindcss';
+@import '@fontsource-variable/inter/wght.css';
+
+/* `dark:` follows the resolved theme that src/app/theme.ts writes to <html data-theme>. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  /* Neutrals + accent (light values; dark overrides below) */
+  --color-bg: #f7f9fb;
+  --color-surface: #ffffff;
+  --color-text: #0f1a20;
+  --color-muted: #55656f;
+  --color-accent: #0e7c86;
+  --color-on-accent: #ffffff;
+  --color-border: #e2e8ec;
+
+  /* NAQI categories: background + text on it (same in both themes) */
+  --color-aqi-good: #237a3c;
+  --color-on-aqi-good: #ffffff;
+  --color-aqi-satisfactory: #8cc63f;
+  --color-on-aqi-satisfactory: #0f1a20;
+  --color-aqi-moderate: #f2d21b;
+  --color-on-aqi-moderate: #0f1a20;
+  --color-aqi-poor: #f28c28;
+  --color-on-aqi-poor: #0f1a20;
+  --color-aqi-very-poor: #c0302a;
+  --color-on-aqi-very-poor: #ffffff;
+  --color-aqi-severe: #8e1b1b;
+  --color-on-aqi-severe: #ffffff;
+
+  /* Typography: Inter Variable, 16 px base, 1.25 (major third) scale */
+  --font-sans:
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --text-sm: 0.8rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5625rem;
+  --text-2xl: 1.953rem;
+  --text-3xl: 2.441rem;
+  --text-4xl: 3.052rem;
+}
+
+@layer base {
+  /* Dark tokens: applied when the user chose dark, or when the system is dark
+     and the user has not forced light (covers first paint before JS runs). */
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    --color-bg: #0e1418;
+    --color-surface: #151d22;
+    --color-text: #e8eef2;
+    --color-muted: #9aabb5;
+    --color-accent: #4fc3cc;
+    --color-on-accent: #0e1418;
+    --color-border: #26323a;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      color-scheme: dark;
+      --color-bg: #0e1418;
+      --color-surface: #151d22;
+      --color-text: #e8eef2;
+      --color-muted: #9aabb5;
+      --color-accent: #4fc3cc;
+      --color-on-accent: #0e1418;
+      --color-border: #26323a;
+    }
+  }
+
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+  }
+
+  /* Visible focus ring: 2 px accent with offset, on every interactive element. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  a {
+    color: var(--color-accent);
+    text-underline-offset: 0.15em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
