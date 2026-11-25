@@ -1,0 +1,11 @@
+dist/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.wrangler/
+package-lock.json
+public/_headers
+
+# Hand-written specs: formatted by their authors, not rewritten by tooling.
+*.md
