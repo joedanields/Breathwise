@@ -1,0 +1,93 @@
+{
+  "latitude": 27.72,
+  "lookupSource": "coordinates",
+  "longitude": 85.32,
+  "localityLanguageRequested": "en",
+  "continent": "Asia",
+  "continentCode": "AS",
+  "countryName": "Nepal",
+  "countryCode": "NP",
+  "principalSubdivision": "Bagmati",
+  "principalSubdivisionCode": "NP-P3",
+  "city": "Kathmandu",
+  "locality": "Kathmandu",
+  "postcode": "",
+  "plusCode": "7MV7P8CC+22",
+  "localityInfo": {
+    "administrative": [
+      {
+        "name": "Nepal",
+        "description": "country in South Asia",
+        "isoName": "Nepal",
+        "order": 5,
+        "adminLevel": 2,
+        "isoCode": "NP",
+        "wikidataId": "Q837",
+        "geonameId": 1282988
+      },
+      {
+        "name": "Bagmati",
+        "description": "province of Nepal",
+        "isoName": "Bagmati",
+        "order": 6,
+        "adminLevel": 4,
+        "isoCode": "NP-P3",
+        "wikidataId": "Q25104015",
+        "geonameId": 12095449
+      },
+      {
+        "name": "Kathmandu District",
+        "description": "district of Nepal",
+        "order": 8,
+        "adminLevel": 6,
+        "wikidataId": "Q797472",
+        "geonameId": 1283241
+      },
+      {
+        "name": "Kathmandu",
+        "description": "capital of Nepal",
+        "order": 9,
+        "adminLevel": 7,
+        "wikidataId": "Q3037",
+        "geonameId": 1283240
+      }
+    ],
+    "informative": [
+      {
+        "name": "Asia",
+        "description": "part of terrestrial continent, mainly in the northeastern quadrant",
+        "isoName": "Asia",
+        "order": 1,
+        "isoCode": "AS",
+        "wikidataId": "Q48",
+        "geonameId": 6255147
+      },
+      {
+        "name": "Tibetan Plateau",
+        "description": "plateau in Central Asia",
+        "order": 2,
+        "wikidataId": "Q179842",
+        "geonameId": 1280231
+      },
+      {
+        "name": "Himalayas",
+        "description": "mountain range in Asia",
+        "order": 3,
+        "wikidataId": "Q5451",
+        "geonameId": 1252558
+      },
+      {
+        "name": "Asia/Kathmandu",
+        "description": "time zone",
+        "order": 4
+      },
+      {
+        "name": "Kathmandu Valley",
+        "description": "valley in Bagmati Province, Nepal",
+        "order": 7,
+        "wikidataId": "Q970717",
+        "geonameId": 1283239
+      }
+    ]
+  }
+}

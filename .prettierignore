@@ -9,3 +9,6 @@ public/_headers
 
 # Hand-written specs: formatted by their authors, not rewritten by tooling.
 *.md
+
+# Recorded API responses: kept exactly as captured.
+tests/fixtures/*.json

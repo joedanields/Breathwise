@@ -1,0 +1,109 @@
+{
+  "latitude": 18.52,
+  "lookupSource": "coordinates",
+  "longitude": 73.86,
+  "localityLanguageRequested": "en",
+  "continent": "Asia",
+  "continentCode": "AS",
+  "countryName": "India",
+  "countryCode": "IN",
+  "principalSubdivision": "Maharashtra",
+  "principalSubdivisionCode": "IN-MH",
+  "city": "Pune",
+  "locality": "Pune",
+  "postcode": "",
+  "plusCode": "7JCMGVC6+22",
+  "localityInfo": {
+    "administrative": [
+      {
+        "name": "India",
+        "description": "country in South Asia",
+        "isoName": "India",
+        "order": 4,
+        "adminLevel": 2,
+        "isoCode": "IN",
+        "wikidataId": "Q668",
+        "geonameId": 1269750
+      },
+      {
+        "name": "Maharashtra",
+        "description": "state in the western and central peninsular region of India",
+        "isoName": "Maharashtra",
+        "order": 7,
+        "adminLevel": 4,
+        "isoCode": "IN-MH",
+        "wikidataId": "Q1191",
+        "geonameId": 1264418
+      },
+      {
+        "name": "Pune district",
+        "description": "district of Maharashtra, India",
+        "order": 10,
+        "adminLevel": 5,
+        "wikidataId": "Q1797336",
+        "geonameId": 1259230
+      },
+      {
+        "name": "Pune Metropolitan Region",
+        "description": "metropolitan area in Maharashtra, India",
+        "order": 11,
+        "adminLevel": 7,
+        "wikidataId": "Q7260110"
+      },
+      {
+        "name": "Pune",
+        "description": "metropolis in Maharashtra, India",
+        "order": 12,
+        "adminLevel": 6,
+        "wikidataId": "Q1538",
+        "geonameId": 1259229
+      },
+      {
+        "name": "Pune City taluka",
+        "description": "tehsil in Maharashtra, India",
+        "order": 13,
+        "adminLevel": 6,
+        "wikidataId": "Q7260101"
+      }
+    ],
+    "informative": [
+      {
+        "name": "Asia",
+        "description": "part of terrestrial continent, mainly in the northeastern quadrant",
+        "isoName": "Asia",
+        "order": 1,
+        "isoCode": "AS",
+        "wikidataId": "Q48",
+        "geonameId": 6255147
+      },
+      {
+        "name": "Asia/Kolkata",
+        "description": "time zone",
+        "order": 2
+      },
+      {
+        "name": "Indian subcontinent",
+        "description": "physiographical region in South Asia",
+        "order": 3,
+        "wikidataId": "Q60140",
+        "geonameId": 6269134
+      },
+      {
+        "name": "Mainland India",
+        "order": 5
+      },
+      {
+        "name": "Western Zonal Council",
+        "order": 6
+      },
+      {
+        "name": "Krishna River basin",
+        "order": 8
+      },
+      {
+        "name": "Central Railway",
+        "order": 9
+      }
+    ]
+  }
+}
