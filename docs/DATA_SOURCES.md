@@ -52,7 +52,8 @@ Verified against a live New Delhi request (2026-11-26):
 - Source: "Open-Meteo Air Quality API · CAMS global model"
 - Reading time: `current.time` rendered in the response `timezone` (e.g. "6:30 pm IST")
 - Fetched: client timestamp → "fetched 3 min ago"
-- Note: "Modelled estimate on a ~45 km grid, not a ground-station reading."
+- Note: "Modelled estimate on a ~45 km grid, not a ground-station reading." followed by "nearest model grid point ~45 km". Never show the response `latitude`/`longitude` as the user's location.
+- Stale: the **reading time** is more than 90 minutes old (readings are hourly for India, so the fetch time says nothing about data age).
 
 ## 2. Open-Meteo Forecast API (weather context)
 
@@ -107,6 +108,8 @@ GET /data/reverse-geocode-client?latitude={lat}&longitude={lon}&localityLanguage
 Fields: `city, locality, principalSubdivision, countryCode, countryName`.
 - Use `city || locality` as the name, `principalSubdivision` as state.
 - If `countryCode !== "IN"`, show the "India only" message.
+- Verified 2026-11-26 from browser responses (Pune `IN`, Kathmandu `NP`): missing text fields come back as empty strings (e.g. `postcode: ""`), so treat `""` as absent. Responses also carry `plusCode`, `principalSubdivisionCode` and `localityInfo`, which we ignore.
+- If the call fails or `countryCode` is empty, use the India bounding-box fallback (ADR-010, `ARCHITECTURE.md §6`).
 - **Fair use:** client-side only; call only after the user taps "Use my location". Never call from the Pages Function. On failure, fall back to showing rounded coordinates.
 
 ## 5. Gemini API (interpretation only)

@@ -109,7 +109,7 @@ Desktop ≥ 1024 px: left column = live data + timeline; right column = plan + c
 | `LocationSearch` | Radix-free ARIA combobox pattern (`role="combobox"`, `aria-expanded`, `aria-activedescendant`, listbox options); arrow keys + Enter + Esc |
 | `LiveAqiCard` | Value in `<data>`; category text always visible; `aria-live="polite"` region announces "India AQI updated: 312, Very Poor" on refresh |
 | `PollutantGrid` | Each tile: name (with `<abbr title>`), value, unit, small band label |
-| `FreshnessBar` | Relative time updates every minute; turns into warning style when stale (> 90 min) |
+| `FreshnessBar` | Relative time updates every minute; turns into warning style when stale: the **reading time** is > 90 min old (not the fetch time; India readings are hourly) |
 | `ForecastTimeline` | Horizontal scroll on mobile; each hour cell has `aria-label="7 pm, PM2.5 182, Very Poor"`; window highlights have text badges W1/W2/V1; "Table view" toggles an accessible `<table>` |
 | `PlanTabs` | Radix Tabs; tab panels lazy |
 | `ActionCard` | `<article>` with heading; priority as text badge ("High priority"); Why/Impact as labelled paragraphs |

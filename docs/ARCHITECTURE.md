@@ -184,8 +184,9 @@ AQ and weather queries run in parallel; the snapshot is built only when both hav
 | Failure | Behaviour |
 |---|---|
 | Geolocation denied/timeout | Message + focus moves to search |
-| Reverse geocode fails | Show "Near 28.61, 77.21" and continue |
+| Reverse geocode fails (or returns no country) | If the coordinates are inside the rough India bounding box (lat 6–37.5, lon 68–97.5): show "Near 28.61, 77.21 (place name unavailable)", keep the search box visible and continue. Outside the box: show the India-only message (ADR-010) |
 | AQ API fails | Error card with retry; no plan generated; never show old data without a "stale" badge |
+| AQ reading older than 90 min | "Stale" badge. Measured from the **reading time** (`current.time`, hourly for India), not the fetch time |
 | Weather API fails | Continue without weather; note in UI and snapshot |
 | NAQI insufficient data (< 3 pollutants or < 16 h for 24 h averages) | Show "India AQI unavailable" + US AQI; rules still run on PM2.5 |
 | `/api/advise` 429 | "Too many requests, try again in a minute" + fallback plan |

@@ -64,3 +64,9 @@ Format: Context → Decision → Consequences. Add new ADRs at the bottom; never
 
 Dependabot ignores the held-back majors (TypeScript ≥ 6.1, ESLint ≥ 10, `@types/node` ≥ 23).
 **Consequences:** Lint, typecheck and tests run on a supported, compatible set. Revisit when typescript-eslint supports TypeScript 7 and jsx-a11y supports ESLint 10, and then lift the Dependabot ignores. One less unmaintained dependency. The AQI colours meet AA for label text. Swatches still rely on their text label and icon, never colour alone.
+
+## ADR-010 India check when reverse geocoding fails
+**Status:** Accepted · 2026-11-26
+**Context:** Breathwise is India-only. After GPS succeeds, BigDataCloud's `countryCode` tells us whether the user is in India. If that call fails (network, fair-use limit, or an empty `countryCode`), we cannot confirm the country. `ARCHITECTURE.md §6` said to show "Near 28.61, 77.21" and continue, which would let a location outside India through.
+**Decision:** Fall back to a coarse India bounding box: latitude 6–37.5, longitude 68–97.5. Inside it, continue with the label "Near 28.61, 77.21 (place name unavailable)" and keep the search box visible so the user can pick a named place. Outside it, show the India-only message. A successful reverse geocode always wins over the box.
+**Consequences:** No extra dependency or data file. The box also covers parts of Pakistan, Nepal, Bhutan, Bangladesh, Myanmar and Sri Lanka, so it is a sanity check, not proof of location; the "place name unavailable" label and the visible search box make that clear. Open-Meteo still returns valid data anywhere, so nothing breaks if a border-area user slips through.
