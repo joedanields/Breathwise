@@ -17,7 +17,8 @@ export function Footer() {
           Weather &amp; geocoding:{' '}
           <ExternalLink href="https://open-meteo.com/">Open-Meteo.com</ExternalLink> (
           <ExternalLink href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</ExternalLink>
-          ). Reverse geocoding:{' '}
+          ). Location data based on{' '}
+          <ExternalLink href="https://www.geonames.org/">GeoNames</ExternalLink>. Reverse geocoding:{' '}
           <ExternalLink href="https://www.bigdatacloud.com/">BigDataCloud</ExternalLink>.
         </p>
         <p>

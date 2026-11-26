@@ -1,14 +1,21 @@
+import type { QueryClient } from '@tanstack/react-query';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { SkipLink } from '@/components/layout/SkipLink';
+import { DataPreview } from '@/features/preview/DataPreview';
 import { ErrorBoundary } from './ErrorBoundary';
 import { AppProviders } from './providers';
 
 const MAIN_ID = 'main';
 
-export function App() {
+interface AppProps {
+  /** For tests: an isolated query client. */
+  queryClient?: QueryClient;
+}
+
+export function App({ queryClient }: AppProps = {}) {
   return (
-    <AppProviders>
+    <AppProviders queryClient={queryClient}>
       <div className="flex min-h-dvh flex-col">
         <SkipLink targetId={MAIN_ID} />
         <Header />
@@ -25,6 +32,7 @@ export function App() {
               Live air quality for anywhere in India, turned into a calm, practical plan for your
               household.
             </p>
+            <DataPreview />
           </ErrorBoundary>
         </main>
         <Footer />
