@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, expect } from 'vitest';
 import { toHaveNoViolations } from './a11y/axe';
 import { server } from './msw/server';
@@ -20,3 +20,6 @@ afterEach(() => {
 afterAll(() => {
   server.close();
 });
+
+// Searches wait for a 300 ms debounce, and the first test in a file pays for a cold start.
+configure({ asyncUtilTimeout: 3000 });
