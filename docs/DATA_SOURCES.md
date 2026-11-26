@@ -6,8 +6,11 @@ All sources below are free, keyless, and callable from the browser. **Before imp
 
 - Docs: https://open-meteo.com/en/docs/air-quality-api
 - Base: `https://air-quality-api.open-meteo.com/v1/air-quality`
-- Model: CAMS (Copernicus Atmosphere Monitoring Service). For India the **global** domain applies: ~0.4° (~45 km) grid, 3-hourly, updated every 12 h; Open-Meteo provides hourly values and a 15-minutely-based "current" block.
-- Units: all concentrations in **µg/m³**, including CO (convert to mg/m³ for NAQI).
+- Model: CAMS (Copernicus Atmosphere Monitoring Service). For India the **global** domain applies: ~0.4° (~45 km) grid, 3-hourly, 5-day horizon, updated every 12 h. Open-Meteo interpolates to hourly values. For India the `current` block is **hourly** (`current.interval` = 3600, verified 2026-11-26), not 15-minutely: the 15-minute data exists only for the European domain.
+- Units: all concentrations in **µg/m³**, including CO (convert to mg/m³ for NAQI). `current_units.uv_index` is an empty string.
+- Not available for India: `ammonia` (Europe only) and lead. NAQI is therefore computed from the six pollutants we fetch (see `AQI_AND_RULES.md`).
+- Limits: `forecast_days` 0–7 (default 5), `past_days` 0–92.
+- Errors: HTTP 400 with `{ "error": true, "reason": "..." }` (e.g. `"Forecast days is invalid. Allowed range 0 to 7. Given 9."`). Parse this shape and surface a generic message.
 - Licence/attribution: CC BY 4.0; credit Open-Meteo and CAMS (see §6).
 
 ### Request
@@ -35,7 +38,14 @@ current_units: { ... }
 hourly: { time: string[], pm10: (number|null)[], pm2_5: (number|null)[], ... }
 ```
 
-Hourly arrays can contain `null` — treat as missing, never as 0.
+Hourly arrays can contain `null` — treat as missing, never as 0. `current` values can also be `null`.
+
+Verified against a live New Delhi request (2026-11-26):
+- `latitude`/`longitude` in the response are the **model grid cell** (e.g. 28.6, 77.2), not the requested point. Never display them as the user's location.
+- `hourly.time` has 24 × (`past_days` + `forecast_days`) entries starting at 00:00 local time on the first past day (96 entries for 1 + 3). Every variable array has the same length as `time`; validate that.
+- Time strings carry **no offset** (`"2026-11-26T13:30"`). The offset comes from `utc_offset_seconds` (19800 for India). Convert to ISO with offset (`2026-11-26T13:30:00+05:30`) at the parsing boundary.
+- `current.time` can fall on a half hour (13:30 IST = 08:00 UTC) even though the interval is 3600 s.
+- `timezone_abbreviation` is `"GMT+5:30"`, not `"IST"`. Format display times with `Intl.DateTimeFormat('en-IN', { timeZone, timeZoneName: 'short' })`, which gives "1:30 pm IST".
 
 ### Provenance to display
 
@@ -53,12 +63,18 @@ Hourly arrays can contain `null` — treat as missing, never as 0.
 GET /v1/forecast
   ?latitude={lat}&longitude={lon}
   &current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,precipitation
-  &hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation_probability
+  &hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation_probability,boundary_layer_height
   &forecast_days=3
   &timezone=auto
 ```
 
-Used for explanations only ("calm, cold air traps pollution near the ground"; "rain later may clear the air"). Optional: if the docs list a boundary-layer-height variable for India, add it as a mixing-height signal — verify availability first.
+Used for explanations only ("calm, cold air traps pollution near the ground"; "rain later may clear the air").
+
+Verified against a live New Delhi request (2026-11-26):
+- `current.interval` is 900 (15-minutely data). Default units: °C, %, km/h, °, mm.
+- `precipitation_probability` is hourly-only (not valid in `current`).
+- `boundary_layer_height` (metres) **is available for India** (New Delhi: 20–35 m at night, ~990 m mid-afternoon), so it is requested as a mixing-height signal. Low values mean pollution is trapped near the ground.
+- Same response conventions as §1: grid-cell coordinates, offset-less times plus `utc_offset_seconds`, and `{ error, reason }` on 400. `forecast_days` 0–16.
 
 ## 3. Open-Meteo Geocoding API (search)
 
@@ -71,6 +87,13 @@ GET /v1/search?name={query}&count=8&language=en&format=json&countryCode=IN
 
 Fields: `id, name, latitude, longitude, admin1 (state), admin2 (district), country_code, timezone, population`.
 Display as `name, admin2 ?, admin1`. Forward search only (no reverse).
+
+Verified against live requests (2026-11-26):
+- **No matches → the `results` key is omitted** (`{"generationtime_ms": …}`); treat as an empty list. The same happens for 0–1 character queries.
+- 2 characters match exact names only (`"Lu"` → the village Lu, Nagaland); 3+ characters use prefix matching (`"Luckn"` → Lucknow). Matching ignores case and diacritics.
+- Everything except `id, name, latitude, longitude, country_code` can be absent: `admin2`, `admin3`, `admin4`, `population` and `postcodes` are often missing (e.g. the "Lu" result has no `admin2` or `population`). Make them optional in the schema.
+- `count` max 100. `format=json` is the default.
+- Attribution: "Location data based on GeoNames" (see §6).
 
 ## 4. BigDataCloud reverse geocoding (GPS → place name)
 
@@ -100,9 +123,11 @@ Fields: `city, locality, principalSubdivision, countryCode, countryName`.
 ```
 Air quality: Open-Meteo.com, using Copernicus Atmosphere Monitoring Service (CAMS) data.
 Contains modified Copernicus Atmosphere Monitoring Service information.
-Weather & geocoding: Open-Meteo.com (CC BY 4.0). Reverse geocoding: BigDataCloud.
+Weather & geocoding: Open-Meteo.com (CC BY 4.0). Location data based on GeoNames. Reverse geocoding: BigDataCloud.
 India AQI is calculated by Breathwise from modelled concentrations using CPCB breakpoints.
 ```
+
+GeoNames credit added 2026-11-26: the Open-Meteo Geocoding docs require "Location data based on GeoNames" (geonames.org).
 
 Link each name to its source page.
 
