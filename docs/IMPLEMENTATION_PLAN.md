@@ -26,16 +26,18 @@ Work top to bottom. Tick boxes as you go. Each phase ends with `npm run check` g
 
 ## Phase 2 — Location & data layer
 
-- [ ] `lib/storage.ts` safe wrappers (try/catch, Zod parse)
-- [ ] `features/location`: `useCurrentPosition` (timeout 10 s, `maximumAge` 10 min), `reverseGeocode` (BigDataCloud), `searchPlaces` (Open-Meteo, `countryCode=IN`), `LocationSearch` combobox, India-only check
-- [ ] `features/airquality/api.ts` + `schemas.ts` (Zod for response in `DATA_SOURCES.md §1`)
-- [ ] `features/weather/api.ts` + `schemas.ts`
-- [ ] `useAirQuality`, `useWeather` (TanStack Query, `staleTime` 15 min, refetch on visibility, interval 15 min)
-- [ ] `scripts/capture-fixtures.mjs` → `tests/fixtures/*.json` (real responses for Delhi, Chennai, a null-gap case, non-India reverse geocode)
-- [ ] MSW handlers using fixtures (tests only)
-- [ ] Tests: schema parsing, null handling, search debounce, geolocation denied
+- [x] `lib/storage.ts` safe wrappers (try/catch, Zod parse)
+- [x] `features/location`: `useCurrentPosition` (timeout 10 s, `maximumAge` 10 min), `reverseGeocode` (BigDataCloud), `searchPlaces` (Open-Meteo, `countryCode=IN`), `LocationSearch` combobox, India-only check
+- [x] `features/airquality/api.ts` + `schemas.ts` (Zod for response in `DATA_SOURCES.md §1`)
+- [x] `features/weather/api.ts` + `schemas.ts`
+- [x] `useAirQuality`, `useWeather` (TanStack Query, `staleTime` 15 min, refetch on visibility, interval 15 min)
+- [x] `scripts/capture-fixtures.mjs` → `tests/fixtures/*.json` (real responses for Delhi, Chennai, a null-gap case, non-India reverse geocode)
+- [x] MSW handlers using fixtures (tests only)
+- [x] Tests: schema parsing, null handling, search debounce, geolocation denied
 
 **Exit:** dev page shows raw parsed current values + reading time for a searched Indian city.
+
+✅ Done 2026-11-26: `features/preview/DataPreview` (temporary, replaced by the Phase 5 dashboard) shows parsed current values, reading time in the location's time zone, "fetched N min ago", the source, the modelled-estimate note and "nearest model grid point ~45 km"; stale is judged by reading time (> 90 min). Checked live for Lucknow, Guwahati and Kochi. India-only fallback: ADR-010.
 
 ## Phase 3 — AQI & rules engine (tests first)
 
