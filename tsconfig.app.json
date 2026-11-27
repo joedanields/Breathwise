@@ -33,5 +33,5 @@
     "erasableSyntaxOnly": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "shared"]
+  "include": ["src", "shared", "functions"]
 }
