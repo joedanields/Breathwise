@@ -41,7 +41,7 @@ IP from `request.headers.get('CF-Connecting-IP')`.
 
 ```
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://air-quality-api.open-meteo.com https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.bigdatacloud.net https://generativelanguage.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://air-quality-api.open-meteo.com https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.bigdatacloud.net https://generativelanguage.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=(), usb=()
@@ -53,6 +53,8 @@ IP from `request.headers.get('CF-Connecting-IP')`.
 ```
 
 If a library requires inline style attributes, add `'unsafe-inline'` to `style-src` **only**, and note why here. Never relax `script-src`.
+
+**Why `style-src` has `'unsafe-inline'` (2026-11-28):** Radix Dialog's modal scroll lock (`react-remove-scroll-bar`) injects a `<style>` element and sets inline styles when a sheet or dialog opens. The e2e CSP check (`tests/e2e/support/stubs.ts`, applied to every page) recorded `style-src-elem` violations without it. A nonce is not possible on static Pages. Inline styles cannot run code, and `script-src 'self'` stays strict: Zod runs in jitless mode (`shared/zodConfig.ts`) so it never probes `eval`, and the same e2e check fails on any `script-src` violation.
 
 ## 5. Client-side rules
 
