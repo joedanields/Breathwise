@@ -91,3 +91,9 @@ Dependabot ignores the held-back majors (TypeScript ≥ 6.1, ESLint ≥ 10, `@ty
 2. Radix Dialog and AlertDialog for sheets and the clear-data confirmation; native inputs, selects and fieldsets for form controls (accessible, no JavaScript, no CSP impact).
 3. CSP: `style-src 'self' 'unsafe-inline'`, because Radix's scroll lock injects a `<style>` element. `script-src 'self'` stays strict: Zod runs jitless (`shared/zodConfig.ts`) so it never probes `eval`. An e2e check applies the production CSP and fails on any violation.
 **Consequences:** Inline styles are allowed (they cannot run code). A future library that needs `eval` or inline scripts will fail the e2e CSP check instead of shipping.
+
+## ADR-013 Gemini model and structured-output schema
+**Status:** Accepted · 2026-11-28
+**Context:** The first live runs through `wrangler pages dev` timed out: `gemini-3.8-flash` did not answer a plan request within 20 s, nor within 60 s on a one-off retry. `gemini-3.5-flash-lite` (the documented cheaper fallback) first returned HTTP 400 "the specified schema produces a constraint that has too many states for serving".
+**Decision:** Use `gemini-3.5-flash-lite` in production and preview (`GEMINI_MODEL` var; `DEFAULT_MODEL` in `shared/config.ts`). Send Gemini a JSON Schema generated from the Zod schemas but limited to `type`, `properties`, `required`, `enum`, `items` and `additionalProperties`; Zod still enforces counts and lengths on the reply. Request `thinkingLevel: "low"`. Keep the 20 s timeout.
+**Consequences:** Plans arrive in about 3 s and pass the grounding guard on the first try (PROMPT_LOG v1.3). Switching back is a one-line var change if 3.8 becomes responsive. Google's error message is logged server-side only for diagnosis.

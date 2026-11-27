@@ -41,6 +41,31 @@ Also log the main **build-time** prompts used with Claude Code (one line each) i
 
 ---
 
+## v1.1 evaluation — 2026-11-28 — first live run (AI_DESIGN.md §9)
+
+Local `wrangler pages dev`, `gemini-3.5-flash-lite`, Delhi capture (26 Nov, 18:30 IST) for all six scenario profiles, plus S3 in Hindi. 7 requests.
+
+| Check | Result |
+|---|---|
+| No ungrounded numbers | ✅ 7/7 on the first try |
+| Sensitive members get stricter advice | ✅ Aarav, Dadi/Baby, Partner |
+| Time advice references W1/W2 | ✅ but ❌ raw ISO timestamps in `when` in 5/7 ("2026-11-27T15:00:00+05:30") |
+| Indoor adapts to purifier / cooking fuel | ❌ no clean room without a purifier (S1), no sizing with unknown CADR (S6), no cooking-smoke action with biomass (S5) |
+| Every action has a non-generic why | ✅ mostly |
+| Emissions claims cite an impactFactId | ⚠️ S3/S6 cited only current emissions, not the savings; S5 wrote "Not applicable." |
+| Language | ✅ Hindi |
+| Masks | ❌ S1 surgical not flagged as limited; S5 infant got "N95 (adults)" instead of "no mask" |
+
+Latency 2.0–3.2 s.
+
+## v1.3 — 2026-11-28 — Times, indoor, masks and impact rules
+
+**Changed:** Plan system prompt rules 12–15 (`AI_DESIGN.md §6.1`): 12-hour times with the window label and no ISO timestamps; clean room without a purifier, ACH or required CADR with one, high-priority cooking-smoke action for biomass/kerosene; mask rules (surgical/cloth limited, N95/FFP2 for adults, never for infants); impact cites the largest CO₂ saving and any exposure benefit, no "not applicable". Gemini schema trimmed to supported keywords (counts and descriptions made it fail with "too many states for serving"). Model `gemini-3.5-flash-lite` (ADR-013).
+**Why:** The v1.1 evaluation above.
+**Result (same 7 requests):** ✅ grounded first try 7/7; ✅ "W1, 3–4 pm" times in all; ✅ clean room in S1/S3/S4/S5; ✅ purifier 6 ACH (S2) and CADR 168 m³/h for unknown CADR (S6); ✅ S5 high-priority cooking-smoke action keeping Dadi and Baby away and "Infants must never wear masks"; ✅ surgical/cloth flagged as limited (S1, S5); ✅ largest saving cited (S1 metro −2.89, S3 bus −3.03, S6 bus −7.98 kg/week); ✅ Hindi. Latency 2.2–3.3 s. One iteration used of the two allowed.
+
+---
+
 ## Build-time prompts (Claude Code)
 
 | Date | Phase | Prompt (summary) | Outcome |
