@@ -36,6 +36,14 @@ describe('fixtures README claims', () => {
     expect(trailingMean(delhi.pm10)).toBeCloseTo(121.8, 1);
   });
 
+  it('real Chennai: 24 h PM2.5 ≈ 7.8 (Good) but 8 h O3 ≈ 50.6 µg/m³, just over the Good edge', () => {
+    const fixture = loadFixture('aqChennai');
+    const chennai = fixture.hourly as { pm2_5: (number | null)[]; ozone: number[] };
+    expect(trailingMean(chennai.pm2_5)).toBeCloseTo(7.8, 1);
+    const ozone8h = chennai.ozone.slice(CURRENT_INDEX - 7, CURRENT_INDEX + 1);
+    expect(ozone8h.reduce((sum, v) => sum + v, 0) / 8).toBeCloseTo(50.6, 1);
+  });
+
   it('the derived severe fixture reaches the severe band', () => {
     const severe = hourly('aqDerivedSevere');
     expect(trailingMean(severe.pm2_5)).toBeCloseTo(300, 0);

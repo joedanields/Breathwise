@@ -14,7 +14,7 @@ Open-Meteo responses come from `node scripts/capture-fixtures.mjs`, which import
 | File | Source | What the data shows |
 |---|---|---|
 | `aq-delhi-2026-11-26.json` | Air Quality API, 28.61, 77.21 | Reading 18:30 IST. Current PM2.5 103.4, PM10 104.8 µg/m³. Trailing 24 h mean (to 18:00): PM2.5 119.9, PM10 121.8 µg/m³, i.e. NAQI **Poor**, not severe. No nulls. |
-| `aq-chennai-2026-11-26.json` | Air Quality API, 13.08, 80.27 | Reading 18:30 IST. Current PM2.5 7.4, PM10 9.5 µg/m³: a **clean** coastal day (NAQI Good), not moderate. No nulls. |
+| `aq-chennai-2026-11-26.json` | Air Quality API, 13.08, 80.27 | Reading 18:30 IST. Current PM2.5 7.4, PM10 9.5 µg/m³: a **clean** coastal day for PM (24 h PM2.5 7.8, Good band), not moderate. NAQI is **Satisfactory (51)** only because the 8 h O3 mean is 50.6 µg/m³, just over the Good edge of 50. No nulls. |
 | `weather-delhi-2026-11-26.json` | Forecast API | 19.1 °C, 59 %, wind 5.1 km/h. Includes `boundary_layer_height`. |
 | `weather-chennai-2026-11-26.json` | Forecast API | 27.1 °C, 84 %, wind 7.8 km/h. |
 | `geo-search-lucknow-2026-11-26.json` | Geocoding API, `Lucknow` | One result. |

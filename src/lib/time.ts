@@ -18,16 +18,30 @@ export function toIsoWithOffset(localTime: string, utcOffsetSeconds: number): st
 
 const OFFSET_PATTERN = /([+-])(\d{2}):(\d{2})$/;
 
+/** The offset suffix of an ISO time and its value in minutes; "Z" or none -> 0. */
+function parseOffset(iso: string): { suffix: string; minutes: number } {
+  const match = OFFSET_PATTERN.exec(iso);
+  if (!match) return { suffix: 'Z', minutes: 0 };
+  const sign = match[1] === '-' ? -1 : 1;
+  return { suffix: match[0], minutes: sign * (Number(match[2]) * 60 + Number(match[3])) };
+}
+
+/** Writes an instant (ms since epoch) as local time in the given offset. */
+function formatAtOffset(epochMs: number, { suffix, minutes }: { suffix: string; minutes: number }) {
+  return `${new Date(epochMs + minutes * 60_000).toISOString().slice(0, 19)}${suffix}`;
+}
+
 /**
  * Shifts an ISO time by whole hours and keeps its offset:
  * "2026-11-26T23:00:00+05:30" + 2 h -> "2026-11-27T01:00:00+05:30". "Z" stays "Z".
  */
 export function addHoursKeepingOffset(iso: string, hours: number): string {
-  const match = OFFSET_PATTERN.exec(iso);
-  const sign = match?.[1] === '-' ? -1 : 1;
-  const offsetMinutes = match ? sign * (Number(match[2]) * 60 + Number(match[3])) : 0;
-  const shiftedLocal = Date.parse(iso) + hours * 3_600_000 + offsetMinutes * 60_000;
-  return `${new Date(shiftedLocal).toISOString().slice(0, 19)}${match ? match[0] : 'Z'}`;
+  return formatAtOffset(Date.parse(iso) + hours * 3_600_000, parseOffset(iso));
+}
+
+/** `date` as an ISO string in the same offset as `referenceIso` (e.g. the location's +05:30). */
+export function isoAtOffsetOf(date: Date, referenceIso: string): string {
+  return formatAtOffset(date.getTime(), parseOffset(referenceIso));
 }
 
 /** Hour of day as written in an ISO time with offset (i.e. in the location's time zone). */

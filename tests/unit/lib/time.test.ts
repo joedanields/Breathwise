@@ -3,6 +3,7 @@ import {
   addHoursKeepingOffset,
   formatFetchedAgo,
   formatReadingTime,
+  isoAtOffsetOf,
   isReadingStale,
   localHour,
   minutesBetween,
@@ -35,6 +36,15 @@ describe('addHoursKeepingOffset', () => {
     ['2026-11-26T02:00:00Z', 1, '2026-11-26T03:00:00Z'],
   ])('%s + %i h -> %s', (iso, hours, expected) => {
     expect(addHoursKeepingOffset(iso, hours)).toBe(expected);
+  });
+});
+
+describe('isoAtOffsetOf', () => {
+  it('writes an instant in the offset of a reference time', () => {
+    const now = new Date('2026-11-26T13:10:00Z');
+    expect(isoAtOffsetOf(now, '2026-11-26T18:30:00+05:30')).toBe('2026-11-26T18:40:00+05:30');
+    expect(isoAtOffsetOf(now, '2026-11-26T10:00:00-03:00')).toBe('2026-11-26T10:10:00-03:00');
+    expect(isoAtOffsetOf(now, '2026-11-26T13:00:00Z')).toBe('2026-11-26T13:10:00Z');
   });
 });
 
