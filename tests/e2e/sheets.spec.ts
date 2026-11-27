@@ -52,6 +52,19 @@ for (const colorScheme of ['light', 'dark'] as const) {
   });
 }
 
+for (const colorScheme of ['light', 'dark'] as const) {
+  test(`dashboard has no axe violations, timeline and table (${colorScheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme });
+    await loadScenario(page, 'S2');
+    await expect(page.getByRole('article', { name: 'Current air quality' })).toBeVisible();
+    await expect(page.getByRole('region', { name: /48-hour PM2.5 timeline/ })).toBeVisible();
+    expect(await axe(page)).toEqual([]);
+    await page.getByRole('button', { name: 'Table view' }).click();
+    await expect(page.getByRole('table')).toBeVisible();
+    expect(await axe(page)).toEqual([]);
+  });
+}
+
 test('no CSP violations while using every sheet and dialog', async ({ page }) => {
   const consoleErrors = await enforceCsp(page);
   await loadScenario(page, 'S6');

@@ -3,10 +3,16 @@ import { useState } from 'react';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { SkipLink } from '@/components/layout/SkipLink';
-import { DataPreview } from '@/features/preview/DataPreview';
+import { Dashboard } from '@/features/dashboard/Dashboard';
+import { LocationPicker } from '@/features/location/LocationPicker';
 import { HouseholdSheet } from '@/features/profile/HouseholdSheet';
 import { Onboarding } from '@/features/profile/Onboarding';
-import { type AppStores, useProfile } from '@/features/profile/stores';
+import {
+  type AppStores,
+  useAppStores,
+  useProfile,
+  useStoredLocation,
+} from '@/features/profile/stores';
 import { SettingsSheet } from '@/features/settings/SettingsSheet';
 import { ErrorBoundary } from './ErrorBoundary';
 import { AppProviders } from './providers';
@@ -22,6 +28,8 @@ interface AppProps {
 
 function AppContent() {
   const profile = useProfile();
+  const location = useStoredLocation();
+  const stores = useAppStores();
   // After "Clear all my data", focus moves to the onboarding heading.
   const [cleared, setCleared] = useState(false);
 
@@ -55,7 +63,17 @@ function AppContent() {
             Live air quality for anywhere in India, turned into a calm, practical plan for your
             household.
           </p>
-          {profile ? <DataPreview /> : <Onboarding focusOnMount={cleared} />}
+          {!profile && <Onboarding focusOnMount={cleared} />}
+          {profile && location && <Dashboard location={location} profile={profile} />}
+          {profile && !location && (
+            <div className="mt-8">
+              <LocationPicker
+                onLocated={(next) => {
+                  stores.setLocation(next);
+                }}
+              />
+            </div>
+          )}
         </ErrorBoundary>
       </main>
       <Footer />
