@@ -9,7 +9,7 @@ export type GeminiError =
   | { kind: 'network' }
   | { kind: 'auth'; status: number }
   | { kind: 'quota' }
-  | { kind: 'http'; status: number }
+  | { kind: 'http'; status: number; detail?: string }
   | { kind: 'blocked'; reason: string }
   | { kind: 'invalid_json' };
 
@@ -99,6 +99,8 @@ export async function callGemini({
           maxOutputTokens: MAX_OUTPUT_TOKENS,
           responseMimeType: 'application/json',
           responseJsonSchema,
+          // Interpretation of given facts needs little reasoning; keeps latency low.
+          thinkingConfig: { thinkingLevel: 'low' },
         },
       }),
     });
@@ -108,14 +110,17 @@ export async function callGemini({
       if (response.status === 401 || response.status === 403) {
         return { ok: false, error: { kind: 'auth', status: response.status } };
       }
-      if (
-        response.status === 400 &&
-        /API_KEY_INVALID|API key not valid/i.test(await response.text())
-      ) {
+      const text = await response.text();
+      if (response.status === 400 && /API_KEY_INVALID|API key not valid/i.test(text)) {
         return { ok: false, error: { kind: 'auth', status: 400 } };
       }
       if (response.status === 429) return { ok: false, error: { kind: 'quota' } };
-      return { ok: false, error: { kind: 'http', status: response.status } };
+      // For server logs only (Google's error message, no key); never sent to clients.
+      const detail = /"message":\s*"([^"]{0,300})/.exec(text)?.[1];
+      return {
+        ok: false,
+        error: { kind: 'http', status: response.status, ...(detail ? { detail } : {}) },
+      };
     }
 
     const parsed = GeminiResponseSchema.safeParse(await response.json());

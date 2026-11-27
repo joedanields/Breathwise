@@ -47,7 +47,10 @@ function mapGeminiError(error: GeminiError): { error: AdviceError; reason: strin
     case 'invalid_json':
       return { error: 'invalid_output', reason: 'invalid_json' };
     case 'http':
-      return { error: 'upstream', reason: `gemini_http_${String(error.status)}` };
+      return {
+        error: 'upstream',
+        reason: `gemini_http_${String(error.status)}${error.detail ? `: ${error.detail}` : ''}`,
+      };
     default:
       return { error: 'upstream', reason: error.kind };
   }

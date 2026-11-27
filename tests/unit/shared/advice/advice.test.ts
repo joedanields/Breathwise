@@ -56,7 +56,7 @@ describe('schemas (AI_DESIGN.md §3, §5)', () => {
   it('gives Gemini only supported JSON Schema keywords', () => {
     const json = JSON.stringify(toGeminiSchema(AdvicePlanSchema));
     expect(json).not.toMatch(/maxLength|minLength|\$schema|pattern/);
-    expect(json).toMatch(/"maxItems":6/);
+    expect(json).not.toMatch(/maxItems|minItems|description/);
     expect(toGeminiSchema(ChatAnswerSchema)).toMatchObject({
       type: 'object',
       required: ['answer', 'relatedWindowRefs', 'outOfScope'],

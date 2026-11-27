@@ -11,8 +11,8 @@ binding = "RATE_LIMIT_KV"
 id = "250e22da7d1047548b6caa7f2708bda8"
 
 [vars]
-# Latest stable Flash at build time; gemini-3.5-flash-lite is the cheaper fallback (DATA_SOURCES.md §5).
-GEMINI_MODEL = "gemini-3.8-flash"
+# gemini-3.5-flash-lite: answers in ~3 s; gemini-3.8-flash did not answer within 60 s on 2026-11-28 (ADR-013).
+GEMINI_MODEL = "gemini-3.5-flash-lite"
 # Comma-separated. An entry starting with "https://*." is a suffix match on the host
 # (preview deploys are https://<hash>.breathwise.pages.dev).
 ALLOWED_ORIGINS = "https://breathwise.pages.dev,https://*.breathwise.pages.dev,http://localhost:5173,http://localhost:8788"
@@ -25,5 +25,5 @@ binding = "RATE_LIMIT_KV"
 id = "ffaf36aa1e714e3ead361e7e51782511"
 
 [env.preview.vars]
-GEMINI_MODEL = "gemini-3.8-flash"
+GEMINI_MODEL = "gemini-3.5-flash-lite"
 ALLOWED_ORIGINS = "https://breathwise.pages.dev,https://*.breathwise.pages.dev,http://localhost:5173,http://localhost:8788"

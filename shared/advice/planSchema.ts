@@ -63,18 +63,18 @@ export const ChatAnswerSchema = z.object({
 
 export type ChatAnswer = z.infer<typeof ChatAnswerSchema>;
 
-/** JSON Schema keywords Gemini structured output honours (others are stripped). */
+/**
+ * JSON Schema keywords sent to Gemini. Length and count limits ("maxItems",
+ * "minItems") and descriptions make the constrained decoder too large ("too many
+ * states for serving"), so they are left out here; Zod enforces them on the reply.
+ */
 const GEMINI_KEYWORDS = new Set([
   'type',
   'properties',
   'required',
   'enum',
   'items',
-  'minItems',
-  'maxItems',
-  'description',
   'additionalProperties',
-  'anyOf',
 ]);
 
 function pick(node: unknown): unknown {

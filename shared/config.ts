@@ -1,9 +1,9 @@
 // Shared limits and defaults (SPA + Pages Function). Never put secrets here.
 
 /** Fallback when GEMINI_MODEL is unset (DATA_SOURCES.md §5); the env var wins. */
-export const DEFAULT_MODEL = 'gemini-3.8-flash';
-/** Cheaper fallback model, switched via GEMINI_MODEL (no code change). */
-export const FALLBACK_MODEL = 'gemini-3.5-flash-lite';
+export const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
+/** Alternative model, switched via GEMINI_MODEL (no code change); see ADR-013. */
+export const FALLBACK_MODEL = 'gemini-3.8-flash';
 export const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 export const GEMINI_TIMEOUT_MS = 20_000;
@@ -12,7 +12,7 @@ export const TEMPERATURE = 0.4;
 export const MAX_OUTPUT_TOKENS = 8192;
 
 /** /api/advise limits (SECURITY.md §3). */
-export const MAX_BODY_BYTES = 24 * 1024;
+export const MAX_BODY_BYTES = 16 * 1024;
 export const RATE_LIMIT_PER_MINUTE = 10;
 export const DAILY_REQUEST_CAP = 2000;
 
