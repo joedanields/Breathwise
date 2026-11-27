@@ -142,16 +142,18 @@ export function createHandler({ timeoutMs = GEMINI_TIMEOUT_MS }: { timeoutMs?: n
     const model = configured === '' ? DEFAULT_MODEL : configured;
     const started = Date.now();
     const outcome = await runAdvice(parsed.data, { apiKey: env.GEMINI_API_KEY, model, timeoutMs });
-    // Operational log only: no profile, no prompt, no key.
-    console.log(
-      JSON.stringify({
-        route: 'advise',
-        mode: parsed.data.mode,
-        model,
-        ms: Date.now() - started,
-        result: outcome.ok ? `ok:${String(outcome.attempts)}` : outcome.reason,
-      }),
-    );
+    if (!outcome.ok) {
+      // Failures only, for diagnosis: no profile, no prompt, no key.
+      console.warn(
+        JSON.stringify({
+          route: 'advise',
+          mode: parsed.data.mode,
+          model,
+          ms: Date.now() - started,
+          result: outcome.reason,
+        }),
+      );
+    }
     if (!outcome.ok) {
       // A rejected server key is an upstream problem for the user; never expose auth detail.
       return fail(outcome.error === 'auth' ? 'upstream' : outcome.error);
