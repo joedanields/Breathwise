@@ -9,9 +9,9 @@ Resume point for the build. Updated after every task. Times are IST.
 
 | | |
 |---|---|
-| Current phase | Phase 8 — Hardening |
+| Current phase | Phase 9 — Deploy & submit |
 | Last commit | see `git log -1` |
-| Next task | Full e2e all browsers, coverage, bundle (lazy sheets?), Lighthouse, contrast tokens, README screenshots |
+| Next task | Production smoke (S1–S6, E1, E4, E6), DEPLOYMENT §6 curls, README, SUBMISSION.md |
 | Timebox | P4 02:30 · P5 05:00 · P6 07:30 · P7 09:00 · P8 10:15 · P9 10:45 |
 
 ## Done
@@ -27,12 +27,16 @@ Resume point for the build. Updated after every task. Times are IST.
 
 - Phase 7 (01:50–02:05): chat with E6/E7 verified live; chat prompt v1.1.
 
+- Phase 8 (02:05–02:25): e2e journeys 1/3/4/E1, contrast doc, bundle 165 KB, npm audit clean, prompt v1.4 (India AQI vs US AQI naming). Production /api/advise verified: 403 bad origin, 200 plan in 4.1 s (Gemini calls used on production: 1 of 10).
+
 ## Decisions (this run)
 
 - Model switched to `gemini-3.5-flash-lite` everywhere (ADR-013): `gemini-3.8-flash` did not answer within 60 s. Local `.dev.vars` still says 3.8; local runs use `--binding GEMINI_MODEL=gemini-3.5-flash-lite`.
 - Phase 4 decisions accepted by the owner: W1/W2 and X1/X2 at least 1 h apart; WFH alternative renamed "One fewer commuting day a week (e.g. working from home)" (id `co2_wfh_extra_day`); S4 unchanged; remember location on by default (2 dp); WFH exposure benefit only when the commute ratio > 1; `carAc` S1 `windows_open`, S6 `ac_closed`.
 
 ## Open issues
+
+- Owner (manual): Lighthouse run (agent sandbox blocked it) and a screen-reader pass.
 
 - Local Firefox (Windows, software GL) crashes inside axe on the dashboard page; CI Firefox (Linux) passes.
 - Owner: optionally update the local `.dev.vars` GEMINI_MODEL to `gemini-3.5-flash-lite` (I don't edit that file).

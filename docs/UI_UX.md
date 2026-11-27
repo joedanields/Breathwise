@@ -60,6 +60,12 @@ Typography: `Inter Variable` (UI) self-hosted via `@fontsource-variable/inter`; 
 
 Icons: `lucide-react` (tree-shaken).
 
+### 2.x Contrast verification (Phase 8, 2026-11-28)
+
+Every token pair in use is checked by axe's `color-contrast` rule in Playwright (real rendering, so text over tokens, focus rings and badges are all covered), in **light and dark** themes, on: onboarding steps 1–3 (including error states), the Household, Settings, About, sample-household and clear-data dialogs, the dashboard (India AQI card, pollutant grid, freshness bar, weather, 48 h timeline and its table view), the plan tabs and the chat. CI runs these on Chromium, Firefox, WebKit and a 360 px mobile viewport (`tests/e2e/*.spec.ts`). Result: 0 violations.
+
+Pairs added after §2 was written, all passing: accent text/borders on surface and bg (light `#0e7c86`, dark `#4fc3cc`); error text `aqi-very-poor` on surface in light (5.68:1) and `text` in dark; timeline cells use the `aqi-*` / `on-aqi-*` pairs from §2.
+
 ## 3. Screens
 
 ### 3.1 Onboarding (3 short steps, progress indicator "Step 1 of 3")

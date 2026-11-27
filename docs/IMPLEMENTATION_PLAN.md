@@ -110,13 +110,13 @@ Work top to bottom. Tick boxes as you go. Each phase ends with `npm run check` g
 
 ## Phase 8 — Hardening, performance, a11y
 
-- [ ] Full axe pass on all states; manual keyboard + screen reader (NVDA or VoiceOver) pass
-- [ ] Contrast verification of all tokens; update `UI_UX.md`
-- [ ] Bundle check (< 200 KB gzip initial); lazy-load chat and sheets
-- [ ] Lighthouse targets from `TESTING.md §8`
-- [ ] E2E journeys 1–8 green in CI
-- [ ] `npm audit` clean (high+), gitleaks clean
-- [ ] README screenshots
+- [x] Full axe pass on all states (e2e, light + dark, 4 projects); keyboard-only e2e — **screen reader (NVDA/VoiceOver) pass: manual, for the owner**
+- [x] Contrast verification of all tokens; update `UI_UX.md`
+- [x] Bundle check (< 200 KB gzip initial: 165 KB); chat lazy-loaded (sheets kept in the main chunk: budget met)
+- [ ] Lighthouse targets from `TESTING.md §8` — **manual, for the owner** (automated run was blocked by the agent sandbox)
+- [x] E2E journeys 1–8 green in CI
+- [x] `npm audit` clean (high+), gitleaks clean
+- [x] README screenshots
 
 **Exit:** CI fully green; Lighthouse targets met locally.
 
