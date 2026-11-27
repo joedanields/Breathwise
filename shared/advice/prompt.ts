@@ -91,6 +91,10 @@ function factsBlock(snapshot: FactsSnapshot): string {
 }
 
 /** Appended on the single retry after a grounding-guard violation (AI_DESIGN.md §7). */
+/** Appended on the single retry after a schema failure. */
+export const SCHEMA_RETRY_NOTE =
+  'Your previous answer did not match the required JSON shape. Return JSON only, with every required field, at most 6 routine and 6 indoor actions, and short text.';
+
 export function groundingRetryNote(numbers: readonly number[]): string {
   return `Your previous answer contained numbers not in FACTS: [${numbers.join(', ')}]. Remove or replace them with qualitative wording.`;
 }

@@ -8,7 +8,13 @@ import {
   planTexts,
   ungroundedNumbers,
 } from '@shared/advice/groundingGuard';
-import { AdvicePlanSchema, ChatAnswerSchema, toGeminiSchema } from '@shared/advice/planSchema';
+import {
+  AdvicePlanSchema,
+  ChatAnswerSchema,
+  normaliseChatAnswer,
+  normalisePlan,
+  toGeminiSchema,
+} from '@shared/advice/planSchema';
 import {
   buildChatUserPrompt,
   buildPlanUserPrompt,
@@ -78,6 +84,47 @@ describe('schemas (AI_DESIGN.md §3, §5)', () => {
     expect(AdviceRequestSchema.safeParse({ mode: 'plan', snapshot, prompt: 'x' }).success).toBe(
       false,
     );
+  });
+});
+
+describe('normalisePlan / normaliseChatAnswer', () => {
+  it('trims over-long text at a word boundary and caps lists, keeping the plan valid', () => {
+    const plan = samplePlan();
+    const [first] = plan.routine;
+    if (!first) return;
+    const long = {
+      ...plan,
+      summary: 'word '.repeat(200),
+      routine: Array.from({ length: 8 }, (_, i) => ({
+        ...first,
+        id: `a${String(i)}`,
+        why: 'because '.repeat(60),
+      })),
+    };
+    expect(AdvicePlanSchema.safeParse(long).success).toBe(false);
+    const fixed = AdvicePlanSchema.parse(normalisePlan(long));
+    expect(fixed.routine).toHaveLength(6);
+    expect(fixed.summary.length).toBeLessThanOrEqual(400);
+    expect(fixed.summary.endsWith('…')).toBe(true);
+    expect(fixed.routine[0]?.why.length).toBeLessThanOrEqual(280);
+  });
+
+  it('leaves valid plans unchanged and still rejects missing fields', () => {
+    expect(normalisePlan(samplePlan())).toEqual(samplePlan());
+    expect(AdvicePlanSchema.safeParse(normalisePlan({ headline: 'x' })).success).toBe(false);
+    expect(normalisePlan('not an object')).toBe('not an object');
+  });
+
+  it('trims chat answers and window refs', () => {
+    const fixed = ChatAnswerSchema.parse(
+      normaliseChatAnswer({
+        answer: 'a '.repeat(600),
+        relatedWindowRefs: ['W1', 'W2', 'V1', 'X1'],
+        outOfScope: false,
+      }),
+    );
+    expect(fixed.answer.length).toBeLessThanOrEqual(900);
+    expect(fixed.relatedWindowRefs).toEqual(['W1', 'W2', 'V1']);
   });
 });
 
@@ -261,7 +308,20 @@ describe('runAdvice (guard + one retry)', () => {
     });
   });
 
-  it('rejects output that fails the schema', async () => {
+  it('retries once after a schema failure, then succeeds', async () => {
+    const prompts: string[] = [];
+    server.use(
+      http.post(URL, async ({ request: req }) => {
+        const body = (await req.json()) as { contents: { parts: { text: string }[] }[] };
+        prompts.push(body.contents[0]?.parts[0]?.text ?? '');
+        return geminiReply(prompts.length === 1 ? { headline: 'x' } : samplePlan());
+      }),
+    );
+    expect(await runAdvice(request, deps)).toMatchObject({ ok: true, attempts: 2 });
+    expect(prompts[1]).toContain('did not match the required JSON shape');
+  });
+
+  it('rejects output that fails the schema twice', async () => {
     server.use(http.post(URL, () => geminiReply({ headline: 'x' })));
     expect(await runAdvice(request, deps)).toMatchObject({
       ok: false,

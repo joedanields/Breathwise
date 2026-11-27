@@ -83,6 +83,14 @@ Latency 2.0–3.2 s.
 
 ---
 
+## Guard v1.1 — 2026-11-28 — Normalise lengths, retry once on schema failure
+
+**Changed:** Before Zod validation, over-long text is trimmed at a word boundary ("…") and lists are capped (`normalisePlan`, `normaliseChatAnswer`); a remaining schema failure gets one retry with a short "match the JSON shape" note (`SCHEMA_RETRY_NOTE`). No prompt rule changed.
+**Why:** In the production smoke test, S1 (New Delhi, India AQI 339) fell back to the rules plan; reproduced locally as `invalid_output: schema`. Gemini's schema can't carry our length and count limits (ADR-013), so a long `why` or a 7th action failed Zod.
+**Result:** S1 with live data 3/3 AI plans locally (was 1/2).
+
+---
+
 ## Build-time prompts (Claude Code)
 
 | Date | Phase | Prompt (summary) | Outcome |

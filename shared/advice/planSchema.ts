@@ -97,3 +97,70 @@ function pick(node: unknown): unknown {
 export function toGeminiSchema(schema: z.ZodType): unknown {
   return pick(z.toJSONSchema(schema, { io: 'output' }));
 }
+
+/** Shortens text to `max` characters at a word boundary, ending with "…". */
+function clipText(value: unknown, max: number): unknown {
+  if (typeof value !== 'string' || value.length <= max) return value;
+  const cut = value.slice(0, max - 1);
+  const space = cut.lastIndexOf(' ');
+  return `${(space > max * 0.6 ? cut.slice(0, space) : cut).trimEnd()}…`;
+}
+
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+
+function clipFields(value: unknown, limits: Record<string, number>): unknown {
+  const record = asRecord(value);
+  if (!record) return value;
+  const out: Record<string, unknown> = { ...record };
+  for (const [key, max] of Object.entries(limits)) out[key] = clipText(record[key], max);
+  return out;
+}
+
+const capList = (value: unknown, max: number, each: (item: unknown) => unknown) =>
+  Array.isArray(value) ? value.slice(0, max).map(each) : value;
+
+const ACTION_LIMITS = {
+  id: 40,
+  title: 90,
+  when: 60,
+  windowRef: 4,
+  why: 280,
+  impact: 200,
+  impactFactId: 40,
+};
+
+/**
+ * Gemini's schema cannot carry our length and count limits (ADR-013), so long
+ * text is trimmed and long lists are capped before Zod validates. Zod still
+ * decides validity; missing or mistyped fields still fail.
+ */
+export function normalisePlan(value: unknown): unknown {
+  const plan = asRecord(value);
+  if (!plan) return value;
+  const action = (a: unknown) => clipFields(a, ACTION_LIMITS);
+  return {
+    ...plan,
+    headline: clipText(plan.headline, 120),
+    summary: clipText(plan.summary, 400),
+    routine: capList(plan.routine, 6, action),
+    indoor: capList(plan.indoor, 6, action),
+    impact: capList(plan.impact, 5, (i) =>
+      clipFields(i, { title: 90, health: 240, emissions: 200, impactFactId: 40 }),
+    ),
+    memberNotes: capList(plan.memberNotes, 8, (n) => clipFields(n, { note: 200 })),
+    seekCareIf: clipText(plan.seekCareIf, 200),
+  };
+}
+
+export function normaliseChatAnswer(value: unknown): unknown {
+  const answer = asRecord(value);
+  if (!answer) return value;
+  return {
+    ...answer,
+    answer: clipText(answer.answer, 900),
+    relatedWindowRefs: capList(answer.relatedWindowRefs, 3, (r) => clipText(r, 4)),
+  };
+}

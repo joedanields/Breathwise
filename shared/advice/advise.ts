@@ -8,6 +8,8 @@ import {
   type AdvicePlan,
   type ChatAnswer,
   ChatAnswerSchema,
+  normaliseChatAnswer,
+  normalisePlan,
   toGeminiSchema,
 } from './planSchema';
 import {
@@ -16,6 +18,7 @@ import {
   CHAT_SYSTEM_PROMPT,
   groundingRetryNote,
   PLAN_SYSTEM_PROMPT,
+  SCHEMA_RETRY_NOTE,
 } from './prompt';
 import type { AdviceError, AdviceRequest } from './requestSchema';
 
@@ -77,8 +80,16 @@ export async function runAdvice(request: AdviceRequest, deps: AdviceDeps): Promi
     if (!result.ok) return { ok: false, ...mapGeminiError(result.error) };
 
     const schema: z.ZodType<AdvicePlan | ChatAnswer> = isPlan ? AdvicePlanSchema : ChatAnswerSchema;
-    const parsed = schema.safeParse(result.value);
-    if (!parsed.success) return { ok: false, error: 'invalid_output', reason: 'schema' };
+    const parsed = schema.safeParse(
+      isPlan ? normalisePlan(result.value) : normaliseChatAnswer(result.value),
+    );
+    if (!parsed.success) {
+      if (attempt < MAX_ATTEMPTS) {
+        retryNote = SCHEMA_RETRY_NOTE;
+        continue;
+      }
+      return { ok: false, error: 'invalid_output', reason: 'schema' };
+    }
 
     const texts = isPlan
       ? planTexts(parsed.data as AdvicePlan)
