@@ -41,14 +41,16 @@ Work top to bottom. Tick boxes as you go. Each phase ends with `npm run check` g
 
 ## Phase 3 — AQI & rules engine (tests first)
 
-- [ ] `lib/aqi/breakpoints.ts` (with CPCB reference comment), `averages.ts`, `naqi.ts`, `categories.ts`
-- [ ] `lib/rules/bands.ts`, `trend.ts`, `windows.ts`, `ventilation.ts`, `thresholds.ts`, `memberRisk.ts`
-- [ ] `lib/impact/emissionFactors.ts` (each with source + URL), `commuteEmissions.ts`
-- [ ] Purifier ACH facts helper
-- [ ] `lib/snapshot.ts` → `FactsSnapshot` + `shared/types.ts` + Zod `FactsSnapshotSchema`
-- [ ] All unit tests in `TESTING.md §3` for these modules; coverage ≥ 90%
+- [x] `lib/aqi/breakpoints.ts` (with CPCB reference comment), `averages.ts`, `naqi.ts`, `categories.ts`
+- [x] `lib/rules/bands.ts`, `trend.ts`, `windows.ts`, `ventilation.ts`, `thresholds.ts`, `memberRisk.ts`
+- [x] `lib/impact/emissionFactors.ts` (each with source + URL), `commuteEmissions.ts`
+- [x] Purifier ACH facts helper
+- [x] `lib/snapshot.ts` → `FactsSnapshot` + `shared/types.ts` + Zod `FactsSnapshotSchema`
+- [x] All unit tests in `TESTING.md §3` for these modules; coverage ≥ 90%
 
 **Exit:** `buildFactsSnapshot(fixture…)` produces a valid snapshot; all rule tests green.
+
+✅ Done 2026-11-27: snapshots from the Delhi and Chennai captures and both derived fixtures validate against `FactsSnapshotSchema`. Sources and conventions: `AQI_AND_RULES.md §0`, ADR-011. Impact facts are signed and exposure benefits separate (prompt v1.1).
 
 ## Phase 4 — Profile & onboarding
 
