@@ -82,3 +82,12 @@ Dependabot ignores the held-back majors (TypeScript ≥ 6.1, ESLint ≥ 10, `@ty
 5. Metro = UNEP-DTU energy intensity (back-calculated, 0.061 ÷ 0.943 kWh/pkm) × CEA v22.0 FY 2025-26 grid factor (0.675 tCO₂/MWh) ≈ 0.0437 kg/pkm, with the system-boundary caveat (power generation vs tailpipe) stated in every metro fact.
 6. Impact facts carry a signed weekly delta, and exposure benefits are separate facts (metro and WFH only; bus stays above ambient in Goel et al. 2015).
 **Consequences:** Every number in `AQI_AND_RULES.md` has a "Source status": verified (R/H), CPCB-adjacent (X), or Breathwise convention. Category results never depend on the conventions; only exact values within 401–500 and per-km CO₂ do. Revisit when CPCB revises the AQI method (it is under review) or the India GHG Program publishes a final road paper.
+
+## ADR-012 Local stores, Radix dialogs and the CSP
+**Status:** Accepted · 2026-11-28
+**Context:** Phase 4 adds a persisted profile, settings and location, plus modal sheets. CLAUDE.md asks for Radix primitives, Zod on every `localStorage` read, and a strict CSP.
+**Decision:**
+1. One small external store (`src/lib/localStore.ts`) per key, read through `useSyncExternalStore`; every read is Zod-validated and a corrupt value is removed and reset. Keys share the `breathwise.` prefix, so "Clear all my data" removes exactly ours. The location is stored rounded to 2 dp, only while "Remember location" is on (default on).
+2. Radix Dialog and AlertDialog for sheets and the clear-data confirmation; native inputs, selects and fieldsets for form controls (accessible, no JavaScript, no CSP impact).
+3. CSP: `style-src 'self' 'unsafe-inline'`, because Radix's scroll lock injects a `<style>` element. `script-src 'self'` stays strict: Zod runs jitless (`shared/zodConfig.ts`) so it never probes `eval`. An e2e check applies the production CSP and fails on any violation.
+**Consequences:** Inline styles are allowed (they cannot run code). A future library that needs `eval` or inline scripts will fail the e2e CSP check instead of shipping.

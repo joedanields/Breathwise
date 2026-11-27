@@ -127,7 +127,8 @@ findBestWindows(hourly, { fromIndex, horizonH: 24, durationH, wakingHours: [6, 2
 | Waking hours: start ≥ 06:00 and end ≤ 21:00, local time | Breathwise convention |
 | Duration = longest member activity, rounded up to whole hours (default 1) | Breathwise convention |
 | Score = mean PM2.5; windows containing a missing hour are skipped | Breathwise convention |
-| Best = lowest, non-overlapping, labelled W1, W2; worst = highest, labelled X1, X2; ties go to the earlier start | Breathwise convention |
+| Best = lowest, labelled W1, W2; worst = highest, labelled X1, X2; ties go to the earlier start | Breathwise convention |
+| W1 and W2 (and X1 and X2) are at least **1 hour apart**, so W2 is a genuinely different option | Breathwise convention (owner decision 2026-11-28) |
 | Comparisons: % PM2.5 in W1 vs now, and vs each member's usual activity time; worded "lower", "higher" or "about the same" | Breathwise convention |
 
 ## 5. Ventilation windows (`rules/ventilation.ts`)
@@ -204,7 +205,7 @@ weeklyKg = factor × oneWayKm × 2 × daysPerWeek                 (passenger-km 
 
 | Rule | Source status |
 |---|---|
-| Alternatives: carpool with 2 and 3 (cars only), bus, metro (unless current), working from home one more day | Breathwise convention |
+| Alternatives: carpool with 2 and 3 (cars only), bus, metro (unless current), "One fewer commuting day a week (e.g. working from home)" (id `co2_wfh_extra_day`) | Breathwise convention |
 | Each CO₂ fact carries `kgCo2PerWeek` and a **signed** `kgCo2PerWeekDelta` against the current mode: negative = saving, positive = increase, 0 = no change (rounded to 0.01 kg) | Breathwise convention |
 | Descriptions never call an increase a saving: "would cut", "would add … so it is not a CO₂ saving", or "about the same" | Breathwise convention |
 | No distance, no days, or already working from home → no facts | Breathwise convention |
@@ -221,11 +222,13 @@ In-transit PM2.5 as a multiple of ambient, Delhi, morning rush hour (E, abstract
 | auto_rickshaw | 1.3 | verified (E) |
 | bus (AC or open-window) | 1.2 | verified (E) |
 | metro carriage | 0.8 | verified (E) |
-| car (AC 0.5, open window 1.3) | not used: the profile doesn't record AC | Breathwise convention |
+| car, `carAc: ac_closed` (AC on, windows closed) | 0.5 | verified (E) |
+| car, `carAc: windows_open` | 1.3 | verified (E) |
+| car, `carAc` not set | not used | Breathwise convention |
 
 | Rule | Source status |
 |---|---|
-| An exposure-benefit fact is added when the new mode was below ambient (ratio < 1, i.e. metro) and below the current mode, or when the trip is removed (WFH one more day) | Breathwise convention |
+| An exposure-benefit fact is added when the new mode was below ambient (ratio < 1, i.e. metro) and below the current mode, or when a commuting day is removed **and** the current mode is above ambient (ratio > 1). An AC car (0.5×) gets no WFH exposure claim: home air is unknown | Breathwise convention |
 | No exposure benefit is claimed for buses: 1.2× is still above ambient | Breathwise convention, based on E |
 | These facts let the AI make the health case when there is no CO₂ case (e.g. two-wheeler → metro adds CO₂ but cuts in-transit exposure) | Breathwise convention |
 

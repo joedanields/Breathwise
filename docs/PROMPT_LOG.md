@@ -33,6 +33,14 @@ Also log the main **build-time** prompts used with Claude Code (one line each) i
 
 ---
 
+## v1.2 — 2026-11-28 — Car AC in the profile
+
+**Changed:** `HouseholdProfile.commute.carAc` (`'ac_closed' | 'windows_open'`, cars only) in `shared/factsSnapshot.ts`. Exposure facts now use it (Goel et al. 2015: AC car 0.5×, open-window car 1.3× ambient). The WFH alternative is renamed "One fewer commuting day a week (e.g. working from home)" and only claims an exposure benefit when the commute is above ambient. W1/W2 and X1/X2 are at least 1 h apart. No prompt text changed.
+**Why:** The scenario check showed S1's school run had no exposure facts (car AC unknown) and "Working from home one more day" made no sense for a school run. Adjacent W1/W2 (14:00 and 15:00) gave no real second option.
+**Result:** _Pending — run after Phase 6._
+
+---
+
 ## Build-time prompts (Claude Code)
 
 | Date | Phase | Prompt (summary) | Outcome |

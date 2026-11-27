@@ -54,14 +54,16 @@ Work top to bottom. Tick boxes as you go. Each phase ends with `npm run check` g
 
 ## Phase 4 — Profile & onboarding
 
-- [ ] `profileSchema.ts` (Zod, member label ≤ 30 chars), `profileStore` (localStorage), `lib/hash.ts`
-- [ ] Onboarding steps 1–3 per `UI_UX.md §3.1`
-- [ ] Household sheet (edit), Settings sheet (theme, language, remember location, clear data)
-- [ ] `scenarios.ts` with S1–S6 from `TEST_SCENARIOS.md` (profile + location only)
-- [ ] "Try a sample household" picker
-- [ ] Tests: keyboard-only onboarding, validation errors, clear data, scenario load
+- [x] `profileSchema.ts` (Zod, member label ≤ 30 chars), `profileStore` (localStorage), `lib/hash.ts`
+- [x] Onboarding steps 1–3 per `UI_UX.md §3.1`
+- [x] Household sheet (edit), Settings sheet (theme, language, remember location, clear data)
+- [x] `scenarios.ts` with S1–S6 from `TEST_SCENARIOS.md` (profile + location only)
+- [x] "Try a sample household" picker
+- [x] Tests: keyboard-only onboarding, validation errors, clear data, scenario load
 
 **Exit:** user can onboard or load a scenario; profile persists across reloads.
+
+✅ Done 2026-11-28: onboarding, Household and Settings sheets, S1–S6 picker (checked against TEST_SCENARIOS.md by a test), clear data with confirmation, corrupt-storage reset. E2E: keyboard-only onboarding, axe on every step and sheet in light and dark, CSP violation check (ADR-012).
 
 ## Phase 5 — Dashboard (live data UI)
 
