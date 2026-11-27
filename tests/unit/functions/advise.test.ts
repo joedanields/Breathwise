@@ -1,5 +1,5 @@
 import { delay, http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { geminiUrl } from '@shared/advice/gemini';
 import { createHandler, type Env, isAllowedOrigin, onRequest } from '../../../functions/api/advise';
 import { server } from '../../msw/server';
@@ -81,6 +81,10 @@ describe('origin rules', () => {
 });
 
 describe('/api/advise checks (SECURITY.md §3)', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('405 for non-POST', async () => {
     const { response } = await call(
       new Request('https://breathwise.pages.dev/api/advise', { method: 'GET' }),
@@ -120,6 +124,9 @@ describe('/api/advise checks (SECURITY.md §3)', () => {
   });
 
   it('429 after 10 requests a minute from one IP, with Retry-After', async () => {
+    // Pin the clock mid-minute so the 11 requests share one per-minute key.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-28T08:00:30Z'));
     geminiReturns(samplePlan());
     const e = env();
     for (let i = 0; i < 10; i++)
