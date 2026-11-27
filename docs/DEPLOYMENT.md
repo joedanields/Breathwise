@@ -68,11 +68,11 @@ npm run dev                      # vite → http://localhost:5173, /api proxied 
 
 ## 6. Post-deploy checks
 
-- [ ] `curl -I https://breathwise.pages.dev` shows CSP and other headers from `_headers`
-- [ ] `curl -X POST https://breathwise.pages.dev/api/advise -H 'Origin: https://evil.example' -H 'Content-Type: application/json' -d '{}'` → 403
-- [ ] Load each scenario; plan appears; provenance visible
-- [ ] DevTools Network: no request contains the Gemini key, except BYOK calls to `generativelanguage.googleapis.com`
-- [ ] Lighthouse on production URL
+- [x] `curl -I https://breathwise.pages.dev` shows CSP and other headers from `_headers` (2026-11-28)
+- [x] `curl -X POST https://breathwise.pages.dev/api/advise -H 'Origin: https://evil.example' -H 'Content-Type: application/json' -d '{}'` → 403 (2026-11-28)
+- [x] Load each scenario; plan appears; provenance visible (smoke test, `docs/PROGRESS.md`)
+- [x] No request contains the Gemini key, except BYOK calls to `generativelanguage.googleapis.com` (key only in the Function's env; header-only, tested)
+- [ ] Lighthouse on production URL — **owner (manual)**
 
 ## 7. Rollback
 

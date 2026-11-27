@@ -122,11 +122,11 @@ Work top to bottom. Tick boxes as you go. Each phase ends with `npm run check` g
 
 ## Phase 9 — Deploy & submit
 
-- [ ] Cloudflare Pages project + secrets + KV per `DEPLOYMENT.md`
-- [ ] Set `ALLOWED_ORIGINS` to production + preview domains
-- [ ] Smoke test all scenarios + edge cases on production
-- [ ] Record demo video (`SUBMISSION.md §2`)
-- [ ] Write LinkedIn post (`SUBMISSION.md §3`)
-- [ ] Final pre-submission checklist (`SUBMISSION.md §1`)
+- [x] Cloudflare Pages project + secrets + KV per `DEPLOYMENT.md`
+- [x] Set `ALLOWED_ORIGINS` to production + preview domains
+- [x] Smoke test all scenarios + edge cases on production (S1–S6, E1, E4, E6; `docs/PROGRESS.md`)
+- [ ] Record demo video (`SUBMISSION.md §2`, script ready) — **owner**
+- [x] Write LinkedIn post (`SUBMISSION.md §3`, draft ready to post — **owner posts**)
+- [ ] Final pre-submission checklist (`SUBMISSION.md §1`) — all automated items done; owner: video, LinkedIn, Lighthouse
 
 **Exit:** submission complete.

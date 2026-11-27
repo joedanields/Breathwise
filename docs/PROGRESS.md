@@ -9,9 +9,9 @@ Resume point for the build. Updated after every task. Times are IST.
 
 | | |
 |---|---|
-| Current phase | Phase 9 — Deploy & submit |
+| Current phase | Done — handed over for video, LinkedIn and submission |
 | Last commit | see `git log -1` |
-| Next task | Production smoke (S1–S6, E1, E4, E6), DEPLOYMENT §6 curls, README, SUBMISSION.md |
+| Next task | Owner: record video, run Lighthouse, post LinkedIn, submit |
 | Timebox | P4 02:30 · P5 05:00 · P6 07:30 · P7 09:00 · P8 10:15 · P9 10:45 |
 
 ## Done
@@ -28,6 +28,29 @@ Resume point for the build. Updated after every task. Times are IST.
 - Phase 7 (01:50–02:05): chat with E6/E7 verified live; chat prompt v1.1.
 
 - Phase 8 (02:05–02:25): e2e journeys 1/3/4/E1, contrast doc, bundle 165 KB, npm audit clean, prompt v1.4 (India AQI vs US AQI naming). Production /api/advise verified: 403 bad origin, 200 plan in 4.1 s (Gemini calls used on production: 1 of 10).
+
+- Phase 9 (02:25–02:50): production smoke test, S1 schema fix, README, SUBMISSION.md.
+
+## Production smoke test (https://breathwise.pages.dev, 2026-11-28 ~02:40 IST)
+
+| Check | Result |
+|---|---|
+| Headers (`curl -I`) | ✅ CSP, HSTS, nosniff, Referrer-Policy, Permissions-Policy |
+| `/api/advise` bad origin | ✅ 403 `{"ok":false,"error":"forbidden"}` |
+| `/api/advise` valid origin (S1 plan) | ✅ 200 in 4.1 s |
+| S1 New Delhi | ✅ live India AQI 339 Very Poor, provenance; plan fell back once (`schema`) → fixed in `8ef6d02`, re-checked: ✅ AI plan |
+| S2 Kolkata | ✅ India AQI 303 Very Poor, AI plan |
+| S3 Bengaluru | ✅ India AQI 37 Good, AI plan ("clean air conditions") |
+| S4 Lucknow | ✅ India AQI 330 Very Poor, AI plan |
+| S5 Patna | ✅ India AQI 316 Very Poor, AI plan |
+| S6 Mumbai | ✅ India AQI 127 Moderate (ozone), AI plan |
+| E1 denied location | ✅ "Location access is off for this site…", focus on search |
+| E4 `/api/advise` blocked | ✅ fallback plan + "Personalised AI plan unavailable…" |
+| E6 injection in chat | ✅ "I cannot tell a joke as that is outside my scope…" |
+| CSP console errors | ✅ 0 on every page |
+| Reading time | ✅ "Reading 28 Nov, 1:30 am IST · fetched just now · Open-Meteo Air Quality API · CAMS global model" |
+
+Production Gemini calls used by this run: 9 of the 10 allowed.
 
 ## Decisions (this run)
 
