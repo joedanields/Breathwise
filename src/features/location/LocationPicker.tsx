@@ -62,6 +62,7 @@ export function LocationPicker({ onLocated }: LocationPickerProps) {
               label: formatPlaceLabel(place),
               nameAvailable: true,
               source: 'search',
+              ...(place.state ? { state: place.state } : {}),
             });
           }}
         />

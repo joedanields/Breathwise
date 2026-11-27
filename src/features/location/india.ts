@@ -70,6 +70,7 @@ export function resolveGpsLocation(
         label,
         nameAvailable: true,
         source: 'gps',
+        ...(place.state ? { state: place.state } : {}),
       },
     };
   }

@@ -90,6 +90,7 @@ describe('LocationPicker — geolocation succeeds', () => {
       label: 'Pune, Maharashtra',
       nameAvailable: true,
       source: 'gps',
+      state: 'Maharashtra',
     });
     expect(screen.getByText('Showing Pune, Maharashtra.')).toBeVisible();
     expect(log.urls[0]?.searchParams.get('latitude')).toBe('18.52');

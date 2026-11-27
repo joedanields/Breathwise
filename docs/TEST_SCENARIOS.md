@@ -21,7 +21,7 @@ No API key needed. (Optional: Settings → *Use my own Gemini key*.)
 |---|---|
 | Location | New Delhi, Delhi |
 | Members | "Me" adult 18–59; "Aarav" child 2–5, asthma, play 5:00 pm for 60 min |
-| Commute | Car (petrol), school run 3 km, 5 days/week |
+| Commute | Car (petrol), windows open (no AC), school run 3 km, 5 days/week |
 | Home | Apartment, no purifier, LPG |
 | Masks | Surgical |
 
@@ -82,7 +82,7 @@ No API key needed. (Optional: Settings → *Use my own Gemini key*.)
 |---|---|
 | Location | Mumbai, Maharashtra |
 | Members | "Me" adult, no conditions; "Partner" adult, pregnancy |
-| Commute | Diesel car, 18 km, 2 days/week (WFH 3) |
+| Commute | Diesel car, AC with windows closed, 18 km, 2 days/week (WFH 3) |
 | Home | Apartment, AC, purifier CADR unknown, room 12 m² |
 | Masks | N95 |
 

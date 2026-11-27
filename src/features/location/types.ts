@@ -10,4 +10,6 @@ export interface SelectedLocation extends Coordinates {
   /** False when we only have coordinates (ADR-010); the search box stays visible. */
   nameAvailable: boolean;
   source: 'search' | 'gps';
+  /** State or UT when known (search result or reverse geocode). */
+  state?: string;
 }

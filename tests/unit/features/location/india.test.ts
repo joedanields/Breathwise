@@ -62,6 +62,7 @@ describe('resolveGpsLocation', () => {
         label: 'Pune, Maharashtra',
         nameAvailable: true,
         source: 'gps',
+        state: 'Maharashtra',
       },
     });
   });
