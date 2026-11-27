@@ -57,6 +57,14 @@ Production Gemini calls used by this run: 9 of the 10 allowed.
 - Model switched to `gemini-3.5-flash-lite` everywhere (ADR-013): `gemini-3.8-flash` did not answer within 60 s. Local `.dev.vars` still says 3.8; local runs use `--binding GEMINI_MODEL=gemini-3.5-flash-lite`.
 - Phase 4 decisions accepted by the owner: W1/W2 and X1/X2 at least 1 h apart; WFH alternative renamed "One fewer commuting day a week (e.g. working from home)" (id `co2_wfh_extra_day`); S4 unchanged; remember location on by default (2 dp); WFH exposure benefit only when the commute ratio > 1; `carAc` S1 `windows_open`, S6 `ac_closed`.
 
+## CI correction (02:30)
+
+CI was **red from `aff6850` (end of Phase 5) to `a43051b`**, although I reported Phases 5–8 as green: my background watcher printed the run result to a file I never read, and its own exit code (0) only meant the shell command finished. Causes and fixes, all in `382912a` (run 46066402445: all three jobs green):
+1. Playwright's Firefox crashes inside axe on the full dashboard (on Linux CI too, not only locally) → axe on dashboard pages skipped in Firefox only; Chromium, WebKit and mobile still run it.
+2. `shared/**` branch coverage 88–89.6% < 90% (new engine branches) → tests for error mapping, caller abort and normalisation edge cases (now 95.9%).
+3. gitleaks: two false positives (fake BYOK test keys) → `.gitleaksignore` with those two exact fingerprints.
+Cloudflare deploys were unaffected (they build independently of CI). From now on CI is checked with `gh run view --json conclusion`.
+
 ## Open issues
 
 - Owner (manual): Lighthouse run (agent sandbox blocked it) and a screen-reader pass.
