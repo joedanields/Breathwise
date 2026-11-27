@@ -9,9 +9,9 @@ Resume point for the build. Updated after every task. Times are IST.
 
 | | |
 |---|---|
-| Current phase | Phase 6 — AI layer |
+| Current phase | Phase 7 — Chat & language |
 | Last commit | see `git log -1` |
-| Next task | shared/config, advice schemas, prompt, gemini client, grounding guard, functions/api/advise.ts, transport, fallback plan, PlanTabs |
+| Next task | useChat + lazy ChatPanel (≤ 6 turns, 500 chars), E6/E7 checks with real Gemini, language select already in Settings |
 | Timebox | P4 02:30 · P5 05:00 · P6 07:30 · P7 09:00 · P8 10:15 · P9 10:45 |
 
 ## Done
@@ -23,13 +23,17 @@ Resume point for the build. Updated after every task. Times are IST.
 
 - Phase 5 (00:57–01:10): dashboard replaces the preview page; fixed grid overflow at 360 px (min-w-0) and table scroll-region focus.
 
+- Phase 6 (01:10–01:50): shared advice engine, /api/advise with SECURITY §3 checks, fallback plan, plan tabs, BYOK, prompt v1.3 (S1–S6 checklist, grounded 7/7). Production verified at end of Phase 5: Lucknow live India AQI 329 Very Poor, CSP headers live, 0 CSP errors.
+
 ## Decisions (this run)
 
+- Model switched to `gemini-3.5-flash-lite` everywhere (ADR-013): `gemini-3.8-flash` did not answer within 60 s. Local `.dev.vars` still says 3.8; local runs use `--binding GEMINI_MODEL=gemini-3.5-flash-lite`.
 - Phase 4 decisions accepted by the owner: W1/W2 and X1/X2 at least 1 h apart; WFH alternative renamed "One fewer commuting day a week (e.g. working from home)" (id `co2_wfh_extra_day`); S4 unchanged; remember location on by default (2 dp); WFH exposure benefit only when the commute ratio > 1; `carAc` S1 `windows_open`, S6 `ac_closed`.
 
 ## Open issues
 
-- Local Firefox (Windows, software GL) crashes inside axe on the dashboard page; CI on Linux decides. If CI Firefox fails the same way, skip that one axe test on Firefox (Chromium, WebKit and mobile still cover it).
+- Local Firefox (Windows, software GL) crashes inside axe on the dashboard page; CI Firefox (Linux) passes.
+- Owner: optionally update the local `.dev.vars` GEMINI_MODEL to `gemini-3.5-flash-lite` (I don't edit that file).
 
 ## Run notes
 

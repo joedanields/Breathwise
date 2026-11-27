@@ -81,19 +81,21 @@ Work top to bottom. Tick boxes as you go. Each phase ends with `npm run check` g
 
 ## Phase 6 — AI layer
 
-- [ ] `shared/config.ts` (DEFAULT_MODEL from env, limits, timeouts)
-- [ ] `shared/advice/requestSchema.ts`, `planSchema.ts`, `chatSchema.ts` (+ JSON schemas for Gemini)
-- [ ] `shared/advice/prompt.ts` (v1 prompts from `AI_DESIGN.md §6`)
-- [ ] `shared/advice/gemini.ts` (REST, header auth, timeout, parsing, error mapping)
-- [ ] `shared/advice/groundingGuard.ts` + retry logic
-- [ ] `functions/api/advise.ts` with every check in `SECURITY.md §3`
-- [ ] `features/advice/transport.ts` (proxy | byok), `useAdvice` (cache key), `fallbackPlan.ts`
-- [ ] `PlanTabs`, `ActionCard`, member notes, seek-care callout, regenerate button
-- [ ] `ByokField` in Settings (sessionStorage)
-- [ ] Tests: `TESTING.md §3 shared/advice`, §4 function tests, fallback UI test
-- [ ] Run `AI_DESIGN.md §9` checklist on S1–S6; log in `PROMPT_LOG.md`
+- [x] `shared/config.ts` (DEFAULT_MODEL from env, limits, timeouts)
+- [x] `shared/advice/requestSchema.ts`, `planSchema.ts`, `chatSchema.ts` (+ JSON schemas for Gemini)
+- [x] `shared/advice/prompt.ts` (v1 prompts from `AI_DESIGN.md §6`)
+- [x] `shared/advice/gemini.ts` (REST, header auth, timeout, parsing, error mapping)
+- [x] `shared/advice/groundingGuard.ts` + retry logic
+- [x] `functions/api/advise.ts` with every check in `SECURITY.md §3`
+- [x] `features/advice/transport.ts` (proxy | byok), `useAdvice` (cache key), `fallbackPlan.ts`
+- [x] `PlanTabs`, `ActionCard`, member notes, seek-care callout, regenerate button
+- [x] `ByokField` in Settings (sessionStorage)
+- [x] Tests: `TESTING.md §3 shared/advice`, §4 function tests, fallback UI test
+- [x] Run `AI_DESIGN.md §9` checklist on S1–S6; log in `PROMPT_LOG.md`
 
 **Exit:** plan generated via proxy locally (`wrangler pages dev`) and via BYOK; failures degrade to fallback.
+
+✅ Done 2026-11-28: proxy plans for S1–S6 + Hindi via `wrangler pages dev` with real Gemini, grounded first try 7/7 (PROMPT_LOG v1.1 → v1.3). BYOK uses the same engine in the browser (MSW-tested; a live BYOK run needs the owner's own key). Model `gemini-3.5-flash-lite` (ADR-013). Failures fall back to the rules-based plan with a notice (unit, component and e2e tests).
 
 ## Phase 7 — Chat & language
 
