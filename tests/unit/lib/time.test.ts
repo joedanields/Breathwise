@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  addHoursKeepingOffset,
   formatFetchedAgo,
   formatReadingTime,
   isReadingStale,
+  localHour,
   minutesBetween,
   STALE_AFTER_MINUTES,
   toIsoWithOffset,
@@ -21,6 +23,24 @@ describe('toIsoWithOffset', () => {
   it('produces a string that parses to the right instant', () => {
     const iso = toIsoWithOffset('2026-11-26T13:30', 19800);
     expect(new Date(iso).toISOString()).toBe('2026-11-26T08:00:00.000Z');
+  });
+});
+
+describe('addHoursKeepingOffset', () => {
+  it.each([
+    ['2026-11-26T18:00:00+05:30', 1, '2026-11-26T19:00:00+05:30'],
+    ['2026-11-26T23:00:00+05:30', 2, '2026-11-27T01:00:00+05:30'],
+    ['2026-11-26T09:15:00+05:45', -1, '2026-11-26T08:15:00+05:45'],
+    ['2026-11-26T02:00:00-03:30', 3, '2026-11-26T05:00:00-03:30'],
+    ['2026-11-26T02:00:00Z', 1, '2026-11-26T03:00:00Z'],
+  ])('%s + %i h -> %s', (iso, hours, expected) => {
+    expect(addHoursKeepingOffset(iso, hours)).toBe(expected);
+  });
+});
+
+describe('localHour', () => {
+  it('reads the hour as written in the location time zone', () => {
+    expect(localHour('2026-11-26T18:30:00+05:30')).toBe(18);
   });
 });
 

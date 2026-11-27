@@ -16,6 +16,25 @@ export function toIsoWithOffset(localTime: string, utcOffsetSeconds: number): st
   return `${localTime}:00${sign}${hours}:${minutes}`;
 }
 
+const OFFSET_PATTERN = /([+-])(\d{2}):(\d{2})$/;
+
+/**
+ * Shifts an ISO time by whole hours and keeps its offset:
+ * "2026-11-26T23:00:00+05:30" + 2 h -> "2026-11-27T01:00:00+05:30". "Z" stays "Z".
+ */
+export function addHoursKeepingOffset(iso: string, hours: number): string {
+  const match = OFFSET_PATTERN.exec(iso);
+  const sign = match?.[1] === '-' ? -1 : 1;
+  const offsetMinutes = match ? sign * (Number(match[2]) * 60 + Number(match[3])) : 0;
+  const shiftedLocal = Date.parse(iso) + hours * 3_600_000 + offsetMinutes * 60_000;
+  return `${new Date(shiftedLocal).toISOString().slice(0, 19)}${match ? match[0] : 'Z'}`;
+}
+
+/** Hour of day as written in an ISO time with offset (i.e. in the location's time zone). */
+export function localHour(iso: string): number {
+  return Number(iso.slice(11, 13));
+}
+
 /** "26 Nov, 1:30 pm IST" in the location's time zone. */
 export function formatReadingTime(iso: string, timeZone: string): string {
   return new Intl.DateTimeFormat('en-IN', {
