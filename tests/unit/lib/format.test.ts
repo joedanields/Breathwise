@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { formatMeasurement, NOT_AVAILABLE, ugm3ToMgm3 } from '@/lib/format';
+import { compassPoint, formatMeasurement, NOT_AVAILABLE, ugm3ToMgm3 } from '@/lib/format';
+
+describe('compassPoint', () => {
+  it.each([
+    [0, 'N'],
+    [22, 'N'],
+    [23, 'NE'],
+    [252, 'W'],
+    [315, 'NW'],
+    [359, 'N'],
+    [-90, 'W'],
+  ])('%i° -> %s', (degrees, point) => {
+    expect(compassPoint(degrees)).toBe(point);
+  });
+});
 
 describe('formatMeasurement', () => {
   it.each([

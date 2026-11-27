@@ -20,3 +20,10 @@ export function formatMeasurement(value: number | null, unit: string, decimals =
 export function ugm3ToMgm3(ugm3: number | null): number | null {
   return ugm3 === null ? null : ugm3 / 1000;
 }
+
+const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
+
+/** "NW" for 315°: the 8-point compass direction the wind blows from. */
+export function compassPoint(degrees: number): string {
+  return COMPASS[Math.round((((degrees % 360) + 360) % 360) / 45) % 8] ?? 'N';
+}
