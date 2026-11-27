@@ -128,6 +128,72 @@ describe('normalisePlan / normaliseChatAnswer', () => {
   });
 });
 
+describe('normalisation edge cases', () => {
+  it('cuts text with no spaces at the limit and leaves non-objects alone', () => {
+    const plan = { ...samplePlan(), headline: 'x'.repeat(200) };
+    const fixed = AdvicePlanSchema.parse(normalisePlan(plan));
+    expect(fixed.headline).toHaveLength(120);
+    expect(fixed.headline.endsWith('…')).toBe(true);
+    expect(normaliseChatAnswer(null)).toBeNull();
+    expect(normalisePlan({ ...samplePlan(), routine: 'nope' })).toMatchObject({ routine: 'nope' });
+    const actionNotObject = normalisePlan({ ...samplePlan(), indoor: ['text'] }) as {
+      indoor: unknown[];
+    };
+    expect(actionNotObject.indoor).toEqual(['text']);
+  });
+});
+
+describe('engine error mapping', () => {
+  const deps = { apiKey: 'k', model: MODEL };
+  const request = { mode: 'plan' as const, snapshot: sampleSnapshot() };
+
+  it.each([
+    ['a SAFETY stop', () => geminiReply({}, 'SAFETY'), 'blocked_SAFETY'],
+    [
+      'non-JSON text',
+      () => HttpResponse.json({ candidates: [{ content: { parts: [{ text: 'hi' }] } }] }),
+      'invalid_json',
+    ],
+  ])('maps %s to invalid_output', async (_name, reply, reason) => {
+    server.use(http.post(URL, reply));
+    expect(await runAdvice(request, deps)).toEqual({ ok: false, error: 'invalid_output', reason });
+  });
+
+  it("keeps Google's error message for server logs on other HTTP errors", async () => {
+    server.use(
+      http.post(URL, () =>
+        HttpResponse.json({ error: { message: 'Model is overloaded' } }, { status: 503 }),
+      ),
+    );
+    expect(await runAdvice(request, deps)).toEqual({
+      ok: false,
+      error: 'upstream',
+      reason: 'gemini_http_503: Model is overloaded',
+    });
+  });
+
+  it('reports a caller cancellation as aborted (not a timeout)', async () => {
+    server.use(
+      http.post(URL, async () => {
+        await delay('infinite');
+        return geminiReply({});
+      }),
+    );
+    const controller = new AbortController();
+    const pending = callGemini({
+      apiKey: 'k',
+      model: MODEL,
+      systemPrompt: 's',
+      userPrompt: 'u',
+      responseJsonSchema: {},
+      signal: controller.signal,
+    });
+    controller.abort();
+    const result = await pending;
+    expect(!result.ok && result.error.kind).toBe('aborted');
+  });
+});
+
 describe('prompt (AI_DESIGN.md §6)', () => {
   it('embeds the snapshot and the language', () => {
     const snapshot = {
