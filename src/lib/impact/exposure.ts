@@ -36,8 +36,7 @@ export const EXPOSURE_SOURCE_URL =
  * current mode, or when it removes the trip (WFH). Buses (1.2) stay above
  * ambient, so no benefit is claimed for them.
  */
-export function hasExposureBenefit(from: number | null, to: number | null, removesTrip: boolean) {
-  if (from === null) return false;
+export function hasExposureBenefit(from: number, to: number | null, removesTrip: boolean): boolean {
   if (removesTrip) return true;
   return to !== null && to < 1 && to < from;
 }

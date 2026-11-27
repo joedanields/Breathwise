@@ -19,6 +19,7 @@ const hourOf = (iso: string) => Number(iso.slice(11, 13));
 describe('pm25Band (hourly signal, not NAQI)', () => {
   it.each([
     [null, null],
+    [-1, null],
     [0, 'good'],
     [30, 'good'],
     [30.5, 'satisfactory'],

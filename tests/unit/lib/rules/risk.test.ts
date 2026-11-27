@@ -116,6 +116,12 @@ describe('purifierFacts (AQI_AND_RULES.md §7)', () => {
     });
   });
 
+  it('cannot compute achieved ACH without the CADR', () => {
+    expect(purifierFacts({ type: 'apartment', purifier: { has: true, roomM2: 12 } })).toMatchObject(
+      { has: true, requiredCadrM3h: 168, cadrM3h: null, achievedAch: null },
+    );
+  });
+
   it('cannot compute ACH without the room size', () => {
     expect(purifierFacts({ type: 'hostel', purifier: { has: true, cadrM3h: 250 } })).toMatchObject({
       requiredCadrM3h: null,

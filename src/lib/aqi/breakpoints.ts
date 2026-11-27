@@ -39,17 +39,23 @@ export const POLLUTANTS = [
   'so2',
 ] as const satisfies readonly Pollutant[];
 
-const INDEX_EDGES = [0, 50, 100, 200, 300, 400, 500] as const;
-
-function segments(
-  upperEdges: readonly [number, number, number, number, number, number],
-): Segment[] {
-  return upperEdges.map((cHi, i) => ({
-    cLo: i === 0 ? 0 : (upperEdges[i - 1] ?? 0),
-    cHi,
-    iLo: INDEX_EDGES[i] ?? 0,
-    iHi: INDEX_EDGES[i + 1] ?? 500,
-  }));
+/** Six bands: index 0–50, 50–100, 100–200, 200–300, 300–400, 400–500. */
+function segments([e1, e2, e3, e4, e5, e6]: readonly [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+]): Segment[] {
+  return [
+    { cLo: 0, cHi: e1, iLo: 0, iHi: 50 },
+    { cLo: e1, cHi: e2, iLo: 50, iHi: 100 },
+    { cLo: e2, cHi: e3, iLo: 100, iHi: 200 },
+    { cLo: e3, cHi: e4, iLo: 200, iHi: 300 },
+    { cLo: e4, cHi: e5, iLo: 300, iHi: 400 },
+    { cLo: e5, cHi: e6, iLo: 400, iHi: 500 },
+  ];
 }
 
 export const BREAKPOINTS: Readonly<Record<Pollutant, readonly Segment[]>> = {

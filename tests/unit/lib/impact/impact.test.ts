@@ -7,7 +7,7 @@ import {
   EMISSION_FACTORS,
   METRO_KWH_PER_PKM,
 } from '@/lib/impact/emissionFactors';
-import { IN_TRANSIT_EXPOSURE_RATIO } from '@/lib/impact/exposure';
+import { hasExposureBenefit, IN_TRANSIT_EXPOSURE_RATIO } from '@/lib/impact/exposure';
 
 type Commute = NonNullable<HouseholdProfile['commute']>;
 const MODES: CommuteMode[] = [
@@ -155,6 +155,19 @@ describe('commuteImpactFacts: signed weekly deltas vs the current mode', () => {
 });
 
 describe('exposureBenefit facts (Goel et al. 2015)', () => {
+  it.each([
+    [1.3, 0.8, false, true], // two-wheeler -> metro
+    [1.3, 1.2, false, false], // two-wheeler -> bus: still above ambient
+    [0.8, 0.8, false, false], // no improvement
+    [1.1, null, false, false], // unknown destination ratio
+    [1.1, null, true, true], // trip removed (WFH)
+  ] as const)(
+    'hasExposureBenefit(%f -> %s, removesTrip %s) = %s',
+    (from, to, removes, expected) => {
+      expect(hasExposureBenefit(from, to, removes)).toBe(expected);
+    },
+  );
+
   it('records in-transit to ambient PM2.5 ratios from the study', () => {
     expect(IN_TRANSIT_EXPOSURE_RATIO).toMatchObject({
       walk: 1.4,

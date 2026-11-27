@@ -177,6 +177,15 @@ describe('averages', () => {
     expect(sixteen.pm25.value).toBe(50);
   });
 
+  it('returns empty averages before the first hour', () => {
+    const averages = computeAverages(
+      hourly(24, () => 40),
+      -1,
+    );
+    expect(averages.pm25).toEqual({ value: null, validHours: 0, windowHours: 24 });
+    expect(averages.o3LatestHourUgm3).toBeNull();
+  });
+
   it('marks an 8 h average invalid with only 5 valid hours', () => {
     const averages = computeAverages(
       hourly(24, (i) => (i >= 16 && i < 19 ? null : 20)),
@@ -214,6 +223,10 @@ describe('computeNaqi', () => {
       hoursUsed: 24,
       o3Basis: null,
     });
+  });
+
+  it('ignores an invalid (negative) average instead of scoring it', () => {
+    expect(computeNaqi(averagesWith({ pm25: 50, pm10: -5, no2: 40 }))).toBeNull();
   });
 
   it('is null with fewer than 3 valid pollutants', () => {
