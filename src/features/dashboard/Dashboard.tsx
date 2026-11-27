@@ -2,6 +2,7 @@ import type { HouseholdProfile } from '@shared/types';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { PlanPanel } from '@/features/advice/PlanPanel';
+import { AskBreathwise } from '@/features/chat/AskBreathwise';
 import { ForecastTimeline } from '@/features/airquality/ForecastTimeline';
 import { LiveAqiCard } from '@/features/airquality/LiveAqiCard';
 import { LocationPicker } from '@/features/location/LocationPicker';
@@ -116,6 +117,7 @@ export function Dashboard({ location, profile }: DashboardProps) {
           </div>
           <div className="min-w-0 space-y-6">
             <PlanPanel snapshot={snapshot} />
+            <AskBreathwise snapshot={snapshot} />
             <HouseholdToday snapshot={snapshot} />
           </div>
         </div>

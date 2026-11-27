@@ -30,11 +30,37 @@ export async function stubApis(
     route.fulfill(json('aqDelhi')),
   );
   await page.route('https://api.open-meteo.com/**', (route) => route.fulfill(json('weatherDelhi')));
-  await page.route('**/api/advise', (route) =>
-    overrides.adviseStatus
-      ? route.fulfill({ status: overrides.adviseStatus, json: { ok: false, error: 'upstream' } })
-      : route.fulfill(json('advicePlanSynthetic')),
-  );
+  await page.route('**/api/advise', (route) => {
+    if (overrides.adviseStatus) {
+      return route.fulfill({
+        status: overrides.adviseStatus,
+        json: { ok: false, error: 'upstream' },
+      });
+    }
+    const body = route.request().postDataJSON() as { mode?: string; question?: string };
+    if (body.mode !== 'chat') return route.fulfill(json('advicePlanSynthetic'));
+    const offTopic = /ignore your rules/i.test(body.question ?? '');
+    return route.fulfill({
+      json: {
+        ok: true,
+        mode: 'chat',
+        model: 'synthetic-test',
+        cached: false,
+        data: offTopic
+          ? {
+              answer:
+                'I can only help with air quality, health precautions and your household plan.',
+              relatedWindowRefs: [],
+              outOfScope: true,
+            }
+          : {
+              answer: 'W1, 3–4 pm is the best time today.',
+              relatedWindowRefs: ['W1'],
+              outOfScope: false,
+            },
+      },
+    });
+  });
   await page.route('https://api.bigdatacloud.net/**', (route) =>
     route.fulfill(json(overrides.reverse ?? 'reverseGeocodePune')),
   );
