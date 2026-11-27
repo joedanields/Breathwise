@@ -106,7 +106,7 @@ export const ChatAnswer = z.object({
 
 ## 6. Prompts (`shared/advice/prompt.ts`)
 
-### 6.1 System prompt (plan) — v1
+### 6.1 System prompt (plan) — v1.1
 
 ```
 You are Breathwise, a calm, practical air-quality coach for households in India.
@@ -131,6 +131,8 @@ Rules:
 8. Tone: calm, specific, non-alarmist. Short sentences. No emojis.
 9. Write all text in the language given by FACTS.profile.language.
 10. Output JSON only, matching the provided schema.
+11. If FACTS show a switch increases or doesn't reduce emissions, don't call it a saving; explain any
+    exposure or health benefit instead.
 ```
 
 ### 6.2 User prompt (plan)

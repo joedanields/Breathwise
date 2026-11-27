@@ -118,7 +118,7 @@ breathwise/
 
 ESLint `no-restricted-imports` blocks `tests/**` from `src/**`, `shared/**`, `functions/**`.
 
-## 4. Key types (in `shared/types.ts`)
+## 4. Key types (`shared/types.ts`, inferred from the Zod schemas in `shared/factsSnapshot.ts`)
 
 ```ts
 export type Persona = 'parent' | 'senior' | 'commuter' | 'student';
@@ -126,6 +126,8 @@ export type AgeBand = 'infant_0_1' | 'child_2_5' | 'child_6_12' | 'teen_13_17' |
 export type Condition = 'asthma' | 'copd' | 'heart_disease' | 'pregnancy' | 'allergies' | 'diabetes';
 export type NaqiCategory = 'good' | 'satisfactory' | 'moderate' | 'poor' | 'very_poor' | 'severe';
 export type RiskLevel = 'low' | 'caution' | 'high' | 'very_high';
+export type CommuteMode = 'walk' | 'cycle' | 'two_wheeler' | 'car_petrol' | 'car_diesel' | 'car_cng' | 'auto_rickshaw' | 'bus' | 'metro' | 'wfh';
+export type Pollutant = 'pm25' | 'pm10' | 'no2' | 'o3' | 'co' | 'so2';
 
 export interface Member {
   id: string;
@@ -146,20 +148,35 @@ export interface HouseholdProfile {
   language: 'en' | 'hi' | 'bn' | 'ta' | 'mr';
 }
 
-export interface Window { start: string; end: string; avgPm25Ugm3: number; band: NaqiCategory; label: string /* "W1" */ }
+export interface Window { label: string /* W1, V1, X1 */; start: string; end: string; avgPm25Ugm3: number; band: NaqiCategory }
+
+type ImpactFact =
+  | { id: string; category: 'co2'; mode: CommuteMode; description: string;
+      kgCo2PerWeek: number; kgCo2PerWeekDelta: number /* signed vs current mode: <0 saving, >0 increase */;
+      source: string; sourceUrl: string }
+  | { id: string; category: 'exposureBenefit'; mode: CommuteMode; description: string;
+      exposureRatioFrom: number; exposureRatioTo: number | null /* in-transit PM2.5 ÷ ambient */;
+      source: string; sourceUrl: string };
 
 export interface FactsSnapshot {
   version: 1;
+  generatedAt: string;                       // ISO with the location's offset; "now" is an input, never read from the clock
   location: { name: string; state?: string; latRounded: number; lonRounded: number; timezone: string };
-  provenance: { source: string; model: string; readingTime: string; fetchedAt: string; isModelledEstimate: true };
-  current: { pm25Ugm3: number; pm10Ugm3: number; no2Ugm3: number; so2Ugm3: number; o3Ugm3: number; coMgm3: number; usAqi?: number; dustUgm3?: number; uvIndex?: number };
-  naqi: { value: number; category: NaqiCategory; dominant: string; subIndices: Record<string, number>; hoursUsed: number; isEstimate: true } | null;
-  trend: 'rising' | 'falling' | 'steady';
-  weather: { tempC: number; humidityPct: number; windKmh: number; windDirDeg: number; precipProbPct?: number };
+  provenance: { source: string; model: string; readingTime: string; fetchedAt: string; isModelledEstimate: true; note: string };
+  current: { pm25Ugm3: number | null; pm10Ugm3: number | null; no2Ugm3: number | null; so2Ugm3: number | null; o3Ugm3: number | null;
+             coMgm3: number | null; usAqi: number | null; dustUgm3: number | null; uvIndex: number | null }; // null = missing, never 0
+  pm25Band: NaqiCategory | null;             // current hour's PM2.5 band (hourly signal, not NAQI)
+  naqi: { value: number; category: NaqiCategory; dominant: Pollutant; subIndices: Partial<Record<Pollutant, number>>;
+          hoursUsed: number; isEstimate: true; o3Basis: '8h' | '1h' | null } | null;
+  trend: 'rising' | 'falling' | 'steady' | null;
+  weather: { tempC: number | null; humidityPct: number | null; windKmh: number | null; windDirDeg: number | null;
+             precipProbPct: number | null; boundaryLayerHeightM: number | null } | null;
   windows: { bestOutdoor: Window[]; ventilate: Window[]; worst: Window[] };
-  memberRisk: Array<{ memberId: string; level: RiskLevel; reasons: string[] }>;
-  impactFacts: Array<{ id: string; description: string; kgCo2PerWeek: number; source: string }>;
-  comparisons: Array<{ id: string; text: string; value: number; unit: string }>; // e.g. best-window PM2.5 vs now, % lower
+  memberRisk: Array<{ memberId: string; level: RiskLevel; reasons: string[]; outdoorGuidance: string }>;
+  purifier: { has: boolean; roomM2: number | null; ceilingHeightM: number; targetAch: number;
+              requiredCadrM3h: number | null; cadrM3h: number | null; achievedAch: number | null } | null;
+  impactFacts: ImpactFact[];
+  comparisons: Array<{ id: string; text: string; value: number; unit: string }>; // e.g. W1 vs now, "lower"/"higher" by %
   profile: HouseholdProfile;
 }
 ```

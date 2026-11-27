@@ -25,6 +25,14 @@ Also log the main **build-time** prompts used with Claude Code (one line each) i
 
 ---
 
+## v1.1 — 2026-11-27 — Honest impact facts
+
+**Changed:** Plan system prompt rule 11 (`AI_DESIGN.md §6.1`): "If FACTS show a switch increases or doesn't reduce emissions, don't call it a saving; explain any exposure or health benefit instead." `FactsSnapshot.impactFacts` (Zod, `shared/factsSnapshot.ts`) now carries a signed `kgCo2PerWeekDelta` against the current mode (negative = saving, positive = increase), plus a separate `exposureBenefit` category with in-transit exposure ratios (Goel et al. 2015).
+**Why:** With India-specific factors, some "greener-sounding" switches add CO₂. Example from the Phase 3 tests: a 10 km two-wheeler commute (3.68 kg CO₂/week) vs metro (4.37 kg/week, which also counts power-station emissions) is +0.69 kg/week. An unsigned "saving" field would invite the model to call that a saving. The metro case is still worth making on health grounds (0.8× vs 1.3× ambient PM2.5 in transit), so that is now a separate, sourced fact.
+**Result:** _Pending — run after Phase 6._
+
+---
+
 ## Build-time prompts (Claude Code)
 
 | Date | Phase | Prompt (summary) | Outcome |
