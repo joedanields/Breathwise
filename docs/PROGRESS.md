@@ -9,9 +9,9 @@ Resume point for the build. Updated after every task. Times are IST.
 
 | | |
 |---|---|
-| Current phase | Phase 5 — Dashboard |
+| Current phase | Phase 6 — AI layer |
 | Last commit | see `git log -1` |
-| Next task | LiveAqiCard (NAQI from snapshot), PollutantGrid, FreshnessBar, WeatherStrip, ForecastTimeline + table, About data sheet |
+| Next task | shared/config, advice schemas, prompt, gemini client, grounding guard, functions/api/advise.ts, transport, fallback plan, PlanTabs |
 | Timebox | P4 02:30 · P5 05:00 · P6 07:30 · P7 09:00 · P8 10:15 · P9 10:45 |
 
 ## Done
@@ -21,13 +21,15 @@ Resume point for the build. Updated after every task. Times are IST.
 
 - Phase 4 (00:17–00:55): carAc + 1 h window gap + WFH exposure rule; stable hash; Zod-validated local stores; S1–S6; onboarding; Household/Settings/About/sample sheets; clear data; e2e with CSP check (found and fixed: Zod eval probe → jitless; Radix style injection → `style-src 'unsafe-inline'`; header overflow at 360 px).
 
+- Phase 5 (00:57–01:10): dashboard replaces the preview page; fixed grid overflow at 360 px (min-w-0) and table scroll-region focus.
+
 ## Decisions (this run)
 
 - Phase 4 decisions accepted by the owner: W1/W2 and X1/X2 at least 1 h apart; WFH alternative renamed "One fewer commuting day a week (e.g. working from home)" (id `co2_wfh_extra_day`); S4 unchanged; remember location on by default (2 dp); WFH exposure benefit only when the commute ratio > 1; `carAc` S1 `windows_open`, S6 `ac_closed`.
 
 ## Open issues
 
-- None.
+- Local Firefox (Windows, software GL) crashes inside axe on the dashboard page; CI on Linux decides. If CI Firefox fails the same way, skip that one axe test on Firefox (Chromium, WebKit and mobile still cover it).
 
 ## Run notes
 

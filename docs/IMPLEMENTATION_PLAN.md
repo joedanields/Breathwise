@@ -67,15 +67,17 @@ Work top to bottom. Tick boxes as you go. Each phase ends with `npm run check` g
 
 ## Phase 5 — Dashboard (live data UI)
 
-- [ ] `LiveAqiCard`, `PollutantGrid`, `FreshnessBar` (stale > 90 min), live region
-- [ ] `WeatherStrip` with rules-based context sentence (calm wind / high humidity / rain expected)
-- [ ] `ForecastTimeline` + `ForecastTable`, window badges W1/W2/V1
-- [ ] About-data sheet (sources, model note, NAQI method, attribution, privacy)
-- [ ] Loading skeletons, error cards with retry, insufficient-data state
-- [ ] Responsive two-column layout ≥ 1024 px
-- [ ] Component tests + axe
+- [x] `LiveAqiCard`, `PollutantGrid`, `FreshnessBar` (stale > 90 min), live region
+- [x] `WeatherStrip` with rules-based context sentence (calm wind / high humidity / rain expected)
+- [x] `ForecastTimeline` + `ForecastTable`, window badges W1/W2/V1
+- [x] About-data sheet (sources, model note, NAQI method, attribution, privacy)
+- [x] Loading skeletons, error cards with retry, insufficient-data state
+- [x] Responsive two-column layout ≥ 1024 px
+- [x] Component tests + axe
 
 **Exit:** dashboard fully usable without AI; provenance visible everywhere.
+
+✅ Done 2026-11-28: India AQI card (category text + icon, live region), pollutant grid with sub-indices, FreshnessBar (reading-time staleness), rules-based WeatherStrip, 48 h timeline + table view with W/V/X badges, About data sheet, rules-only "Today for your household" card, loading/error/insufficient states, two columns ≥ 1024 px. E2E axe on the dashboard and table view in light and dark; no horizontal scroll at 360 px.
 
 ## Phase 6 — AI layer
 
