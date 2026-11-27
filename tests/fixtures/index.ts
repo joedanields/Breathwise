@@ -13,6 +13,8 @@ export const FIXTURES = {
   geoSearchNoMatch: 'geo-search-no-match-2026-11-26.json',
   reverseGeocodePune: 'reverse-geocode-pune-2026-11-26.json',
   reverseGeocodeKathmandu: 'reverse-geocode-kathmandu-2026-11-26.json',
+  /** Synthetic /api/advise response for E2E (not air data; see README). */
+  advicePlanSynthetic: 'advice-plan-synthetic.json',
 } as const;
 
 export type FixtureName = keyof typeof FIXTURES;

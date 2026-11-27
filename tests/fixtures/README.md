@@ -49,6 +49,10 @@ Delhi had no nulls, so this fixture blanks values (sets them to `null`) to exerc
 
 Everything else is identical to the Delhi capture.
 
+## Synthetic fixtures (not air data)
+
+`advice-plan-synthetic.json` is a hand-made `/api/advise` response (an `AdvicePlan` for scenario S1 whose numbers all come from the Delhi snapshot). E2E uses it so tests never call live Gemini. It contains no air-quality values of its own.
+
 ## Re-capturing
 
 ```bash

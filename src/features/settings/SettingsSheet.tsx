@@ -8,6 +8,8 @@ import { AboutPrivacy } from '@/features/about/AboutPrivacy';
 import { LANGUAGE_OPTIONS } from '@/features/profile/labels';
 import { ScenarioPicker } from '@/features/profile/ScenarioPicker';
 import { useAppStores, useProfile, useSettings } from '@/features/profile/stores';
+import { byokStore } from './byok';
+import { ByokField } from './ByokField';
 
 const THEME_OPTIONS = [
   ['system', 'Match my device'],
@@ -20,7 +22,7 @@ interface SettingsSheetProps {
   onCleared: () => void;
 }
 
-/** Settings (UI_UX.md §3.3, PRD US-8). BYOK arrives with the AI layer (Phase 6). */
+/** Settings (UI_UX.md §3.3, PRD US-8). */
 export function SettingsSheet({ onCleared }: SettingsSheetProps) {
   const stores = useAppStores();
   const settings = useSettings();
@@ -71,6 +73,8 @@ export function SettingsSheet({ onCleared }: SettingsSheetProps) {
           <AboutPrivacy trigger={<Button variant="secondary">About &amp; privacy</Button>} />
         </div>
 
+        <ByokField />
+
         <section aria-labelledby={`${id}-danger`} className="border-t border-border pt-6">
           <h3 id={`${id}-danger`} className="text-lg font-semibold">
             Your data
@@ -86,6 +90,7 @@ export function SettingsSheet({ onCleared }: SettingsSheetProps) {
               confirmLabel="Clear everything"
               onConfirm={() => {
                 stores.clearAll();
+                byokStore.clear();
                 queryClient.clear();
                 onCleared();
               }}

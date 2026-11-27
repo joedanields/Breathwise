@@ -5,7 +5,12 @@ import { App } from '@/app/App';
 import { SCENARIOS } from '@/features/profile/scenarios';
 import { createAppStores, PROFILE_KEY } from '@/features/profile/stores';
 import { runAxe } from '../a11y/axe';
-import { airQualityHandler, placeSearchHandler, weatherHandler } from '../msw/handlers';
+import {
+  adviseHandler,
+  airQualityHandler,
+  placeSearchHandler,
+  weatherHandler,
+} from '../msw/handlers';
 import { server } from '../msw/server';
 import { at } from '../utils/at';
 import { createTestQueryClient } from '../utils/render';
@@ -16,6 +21,7 @@ beforeEach(() => {
     placeSearchHandler(() => 'geoSearchLucknow'),
     airQualityHandler('aqDelhi'),
     weatherHandler('weatherDelhi'),
+    adviseHandler({ status: 502, body: { ok: false, error: 'upstream' } }),
   );
 });
 

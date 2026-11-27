@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "mode": "plan",
+  "data": {
+    "headline": "Air is Poor today; keep Aarav indoors until W1",
+    "summary": "PM2.5 is high this evening and lowest between 3 and 4 pm tomorrow (W1).",
+    "routine": [
+      {
+        "id": "play-w1",
+        "title": "Move Aarav's play time to W1",
+        "when": "W1, 3–4 pm",
+        "windowRef": "W1",
+        "forMembers": [
+          "aarav"
+        ],
+        "category": "activity",
+        "priority": "high",
+        "why": "PM2.5 in W1 is lower than now by 44%, and Aarav has asthma.",
+        "impact": "Less fine-particle exposure for Aarav during play."
+      }
+    ],
+    "indoor": [
+      {
+        "id": "seal",
+        "title": "Keep windows closed this evening",
+        "forMembers": [
+          "all"
+        ],
+        "category": "sealing",
+        "priority": "medium",
+        "why": "Outdoor PM2.5 is in the Poor band until tomorrow afternoon.",
+        "impact": "Keeps indoor air cleaner without a purifier."
+      }
+    ],
+    "impact": [
+      {
+        "title": "Carpool the school run",
+        "health": "Fewer car trips also mean less traffic smoke near school.",
+        "emissions": "Carpooling with 2 people would cut about 2.1 kg CO₂ a week.",
+        "impactFactId": "co2_carpool_2"
+      }
+    ],
+    "memberNotes": [
+      {
+        "memberId": "aarav",
+        "note": "Keep his reliever inhaler at hand."
+      }
+    ],
+    "seekCareIf": "Wheezing that does not ease with the reliever, or breathlessness at rest."
+  },
+  "model": "synthetic-test",
+  "cached": false
+}

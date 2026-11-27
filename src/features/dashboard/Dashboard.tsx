@@ -1,6 +1,7 @@
 import type { HouseholdProfile } from '@shared/types';
-import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { PlanPanel } from '@/features/advice/PlanPanel';
 import { ForecastTimeline } from '@/features/airquality/ForecastTimeline';
 import { LiveAqiCard } from '@/features/airquality/LiveAqiCard';
 import { LocationPicker } from '@/features/location/LocationPicker';
@@ -15,12 +16,10 @@ import { useDashboardData } from './useDashboardData';
 interface DashboardProps {
   location: SelectedLocation;
   profile: HouseholdProfile;
-  /** The AI plan column (Phase 6); the rules-only summary shows without it. */
-  plan?: ReactNode;
 }
 
 /** Live dashboard (UI_UX.md §3.2). Works fully without AI. */
-export function Dashboard({ location, profile, plan }: DashboardProps) {
+export function Dashboard({ location, profile }: DashboardProps) {
   const headingId = useId();
   const stores = useAppStores();
   const [changing, setChanging] = useState(false);
@@ -116,7 +115,7 @@ export function Dashboard({ location, profile, plan }: DashboardProps) {
             <ForecastTimeline hours={timeline} timeZone={snapshot.location.timezone} />
           </div>
           <div className="min-w-0 space-y-6">
-            {plan}
+            <PlanPanel snapshot={snapshot} />
             <HouseholdToday snapshot={snapshot} />
           </div>
         </div>

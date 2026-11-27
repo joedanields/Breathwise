@@ -93,6 +93,24 @@ test('no horizontal scroll once onboarded (E9, 360 px on mobile)', async ({ page
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
+test('shows the AI plan in tabs (stubbed /api/advise)', async ({ page }) => {
+  await loadScenario(page, 'S1');
+  const plan = page.getByRole('region', { name: 'Your plan for today' });
+  await expect(plan.getByText("Move Aarav's play time to W1")).toBeVisible();
+  await plan.getByRole('tab', { name: 'Indoor air' }).click();
+  await expect(plan.getByText('Keep windows closed this evening')).toBeVisible();
+  expect(await axe(page)).toEqual([]);
+});
+
+test('AI down: fallback plan with a notice (journey 5)', async ({ page }) => {
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await stubApis(page, { adviseStatus: 500 });
+  await loadScenario(page, 'S5');
+  const plan = page.getByRole('region', { name: 'Your plan for today' });
+  await expect(plan.getByText(/Personalised AI plan unavailable/)).toBeVisible();
+  await expect(plan.getByText(/Air is .* today/)).toBeVisible();
+});
+
 test('sample household persists across a reload', async ({ page }) => {
   await loadScenario(page, 'S3');
   await page.reload();

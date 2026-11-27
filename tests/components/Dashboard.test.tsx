@@ -9,7 +9,7 @@ import { SCENARIOS } from '@/features/profile/scenarios';
 import { createAppStores } from '@/features/profile/stores';
 import { loadFixture } from '../fixtures';
 import { runAxe } from '../a11y/axe';
-import { airQualityHandler, weatherHandler } from '../msw/handlers';
+import { adviseHandler, airQualityHandler, weatherHandler } from '../msw/handlers';
 import { server } from '../msw/server';
 import { at } from '../utils/at';
 import { createTestQueryClient } from '../utils/render';
@@ -19,6 +19,7 @@ const TEN_MIN_AFTER = new Date('2026-11-26T13:10:00Z');
 const S1 = at(SCENARIOS, 0);
 
 beforeEach(() => {
+  server.use(adviseHandler({ status: 502, body: { ok: false, error: 'upstream' } }));
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(TEN_MIN_AFTER);
 });
@@ -40,7 +41,11 @@ const card = () => screen.findByRole('article', { name: 'Current air quality' })
 
 describe('Dashboard', () => {
   beforeEach(() => {
-    server.use(airQualityHandler('aqDelhi'), weatherHandler('weatherDelhi'));
+    server.use(
+      airQualityHandler('aqDelhi'),
+      weatherHandler('weatherDelhi'),
+      adviseHandler({ status: 502, body: { ok: false, error: 'upstream' } }),
+    );
   });
 
   it('shows India AQI with category text, icon, dominant pollutant and US AQI', async () => {

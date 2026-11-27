@@ -1,4 +1,4 @@
-import { type AnyHandler, http, HttpResponse } from 'msw';
+import { type AnyHandler, http, HttpResponse, type JsonBodyType } from 'msw';
 import { AIR_QUALITY_URL } from '@/features/airquality/request';
 import { GEOCODING_SEARCH_URL, REVERSE_GEOCODE_URL } from '@/features/location/request';
 import { FORECAST_URL } from '@/features/weather/request';
@@ -54,5 +54,13 @@ export function reverseGeocodeHandler(reply: Reply, log?: Log) {
   return http.get(REVERSE_GEOCODE_URL, ({ request }) => {
     log?.record(request);
     return respond(reply);
+  });
+}
+
+/** Answers POST /api/advise (our Pages Function); never live Gemini in tests. */
+export function adviseHandler(reply: { status?: number; body: unknown }, log?: Log) {
+  return http.post('*/api/advise', ({ request }) => {
+    log?.record(request);
+    return HttpResponse.json(reply.body as JsonBodyType, { status: reply.status ?? 200 });
   });
 }

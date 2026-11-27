@@ -8,7 +8,10 @@ import { type FixtureName, loadFixture } from '../../fixtures';
  * captured fixtures. Unknown external hosts are aborted, so a test can never
  * reach a live API.
  */
-export async function stubApis(page: Page, overrides: { reverse?: FixtureName } = {}) {
+export async function stubApis(
+  page: Page,
+  overrides: { reverse?: FixtureName; adviseStatus?: number } = {},
+) {
   await page.route(/^https:\/\/(?!localhost)/, (route) => route.abort('blockedbyclient'));
   const json = (name: FixtureName) => ({ json: loadFixture(name) });
   await page.route('https://geocoding-api.open-meteo.com/**', (route) => {
@@ -27,6 +30,11 @@ export async function stubApis(page: Page, overrides: { reverse?: FixtureName } 
     route.fulfill(json('aqDelhi')),
   );
   await page.route('https://api.open-meteo.com/**', (route) => route.fulfill(json('weatherDelhi')));
+  await page.route('**/api/advise', (route) =>
+    overrides.adviseStatus
+      ? route.fulfill({ status: overrides.adviseStatus, json: { ok: false, error: 'upstream' } })
+      : route.fulfill(json('advicePlanSynthetic')),
+  );
   await page.route('https://api.bigdatacloud.net/**', (route) =>
     route.fulfill(json(overrides.reverse ?? 'reverseGeocodePune')),
   );
