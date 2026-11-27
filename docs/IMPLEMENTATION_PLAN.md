@@ -99,12 +99,14 @@ Work top to bottom. Tick boxes as you go. Each phase ends with `npm run check` g
 
 ## Phase 7 — Chat & language
 
-- [ ] `useChat`, `ChatPanel` (lazy), history ≤ 6 turns, 500-char limit
-- [ ] Out-of-scope + injection handling verified (E6, E7)
-- [ ] Response language select (en, hi, bn, ta, mr); `lang` attribute on AI text blocks
-- [ ] Tests
+- [x] `useChat`, `ChatPanel` (lazy), history ≤ 6 turns, 500-char limit
+- [x] Out-of-scope + injection handling verified (E6, E7)
+- [x] Response language select (en, hi, bn, ta, mr); `lang` attribute on AI text blocks
+- [x] Tests
 
 **Exit:** chat answers grounded questions for all scenarios.
+
+✅ Done 2026-11-28: lazy ChatPanel (role="log", 500-char counter, ≤ 6 turns sent), grounded and guarded like the plan. Live check: E6 refusal, E7 no invented numbers, S1–S6 sample questions grounded first try 8/8 (PROMPT_LOG chat v1.1). Response language (en, hi, bn, ta, mr) in onboarding and Settings; AI text blocks carry `lang`.
 
 ## Phase 8 — Hardening, performance, a11y
 

@@ -9,9 +9,9 @@ Resume point for the build. Updated after every task. Times are IST.
 
 | | |
 |---|---|
-| Current phase | Phase 7 — Chat & language |
+| Current phase | Phase 8 — Hardening |
 | Last commit | see `git log -1` |
-| Next task | useChat + lazy ChatPanel (≤ 6 turns, 500 chars), E6/E7 checks with real Gemini, language select already in Settings |
+| Next task | Full e2e all browsers, coverage, bundle (lazy sheets?), Lighthouse, contrast tokens, README screenshots |
 | Timebox | P4 02:30 · P5 05:00 · P6 07:30 · P7 09:00 · P8 10:15 · P9 10:45 |
 
 ## Done
@@ -24,6 +24,8 @@ Resume point for the build. Updated after every task. Times are IST.
 - Phase 5 (00:57–01:10): dashboard replaces the preview page; fixed grid overflow at 360 px (min-w-0) and table scroll-region focus.
 
 - Phase 6 (01:10–01:50): shared advice engine, /api/advise with SECURITY §3 checks, fallback plan, plan tabs, BYOK, prompt v1.3 (S1–S6 checklist, grounded 7/7). Production verified at end of Phase 5: Lucknow live India AQI 329 Very Poor, CSP headers live, 0 CSP errors.
+
+- Phase 7 (01:50–02:05): chat with E6/E7 verified live; chat prompt v1.1.
 
 ## Decisions (this run)
 
