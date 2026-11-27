@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 export function Header({ actions }: { actions?: ReactNode }) {
   return (
     <header className="border-b border-border bg-surface">
-      <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-3">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-2 gap-y-3 px-4 py-3">
         <svg
           aria-hidden="true"
           focusable="false"
@@ -21,7 +21,7 @@ export function Header({ actions }: { actions?: ReactNode }) {
           />
         </svg>
         <span className="text-lg font-semibold tracking-tight">Breathwise</span>
-        {actions && <div className="ml-auto flex gap-2">{actions}</div>}
+        {actions && <div className="ml-auto flex flex-wrap gap-2">{actions}</div>}
       </div>
     </header>
   );

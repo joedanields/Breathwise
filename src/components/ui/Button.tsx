@@ -5,7 +5,7 @@ type Variant = 'primary' | 'secondary' | 'danger' | 'link';
 const VARIANT: Record<Variant, string> = {
   primary: 'bg-accent text-on-accent',
   secondary: 'border border-accent text-accent bg-surface',
-  danger: 'bg-aqi-very-poor text-aqi-on-very-poor',
+  danger: 'bg-aqi-very-poor text-on-aqi-very-poor',
   link: 'text-accent underline px-0',
 };
 

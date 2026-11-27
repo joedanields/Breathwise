@@ -36,7 +36,7 @@ export function ConfirmDialog({
             </AlertDialog.Cancel>
             <AlertDialog.Action
               onClick={onConfirm}
-              className="min-h-11 rounded-md bg-aqi-very-poor px-4 font-medium text-aqi-on-very-poor"
+              className="min-h-11 rounded-md bg-aqi-very-poor px-4 font-medium text-on-aqi-very-poor"
             >
               {confirmLabel}
             </AlertDialog.Action>
