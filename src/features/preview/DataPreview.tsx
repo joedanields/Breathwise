@@ -1,11 +1,12 @@
 // Phase 2 exit page (IMPLEMENTATION_PLAN.md): shows the parsed live values for a
 // chosen location. Temporary: the Phase 5 dashboard replaces it.
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import type { AirQualityData } from '@/features/airquality/schemas';
 import { type Fetched, useAirQuality } from '@/features/airquality/useAirQuality';
 import { useNow } from '@/features/airquality/useNow';
 import { LocationPicker } from '@/features/location/LocationPicker';
 import type { SelectedLocation } from '@/features/location/types';
+import { useAppStores, useStoredLocation } from '@/features/profile/stores';
 import type { WeatherData } from '@/features/weather/schemas';
 import { useWeather } from '@/features/weather/useWeather';
 import { formatMeasurement, ugm3ToMgm3 } from '@/lib/format';
@@ -24,12 +25,18 @@ export const GRID_NOTE = 'nearest model grid point ~45 km';
 
 const UGM3 = 'µg/m³';
 
+/** Driven by the stored location; changing it here updates the store. */
 export function DataPreview() {
-  const [location, setLocation] = useState<SelectedLocation | null>(null);
+  const stores = useAppStores();
+  const location = useStoredLocation();
 
   return (
     <div className="mt-8 space-y-6">
-      <LocationPicker onLocated={setLocation} />
+      <LocationPicker
+        onLocated={(next) => {
+          stores.setLocation(next);
+        }}
+      />
       {location && <LiveData location={location} />}
     </div>
   );

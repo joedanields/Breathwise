@@ -1,4 +1,7 @@
-export function Header() {
+import type { ReactNode } from 'react';
+
+/** Site header; `actions` holds the Household and Settings buttons once onboarded. */
+export function Header({ actions }: { actions?: ReactNode }) {
   return (
     <header className="border-b border-border bg-surface">
       <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-3">
@@ -18,6 +21,7 @@ export function Header() {
           />
         </svg>
         <span className="text-lg font-semibold tracking-tight">Breathwise</span>
+        {actions && <div className="ml-auto flex gap-2">{actions}</div>}
       </div>
     </header>
   );

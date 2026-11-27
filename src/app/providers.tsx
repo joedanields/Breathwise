@@ -1,23 +1,32 @@
 import { type QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode, useSyncExternalStore } from 'react';
+import { type AppStores, createAppStores, StoresContext } from '@/features/profile/stores';
 import { createQueryClient } from './queryClient';
 import { applyTheme } from './theme';
 
 interface AppProvidersProps {
   children: ReactNode;
   /** Tests pass their own client (no retries, isolated cache). */
-  queryClient?: QueryClient;
+  queryClient?: QueryClient | undefined;
+  /** Tests pass stores over their own storage. */
+  stores?: AppStores | undefined;
 }
 
-/**
- * App-wide providers: TanStack Query and the theme. The profile/settings stores
- * (Phase 4) are added here when they arrive.
- */
-export function AppProviders({ children, queryClient }: AppProvidersProps) {
+/** App-wide providers: TanStack Query, the profile/settings/location stores and the theme. */
+export function AppProviders({ children, queryClient, stores }: AppProvidersProps) {
   const [client] = useState(() => queryClient ?? createQueryClient());
+  const [appStores] = useState(() => stores ?? createAppStores());
+  const settings = useSyncExternalStore(
+    appStores.settings.subscribe,
+    appStores.settings.get,
+    appStores.settings.get,
+  );
 
-  // Follows the OS theme for now; the Settings sheet (Phase 4) supplies a user preference.
-  useEffect(() => applyTheme('system'), []);
+  useEffect(() => applyTheme(settings.theme), [settings.theme]);
 
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  return (
+    <StoresContext.Provider value={appStores}>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    </StoresContext.Provider>
+  );
 }
