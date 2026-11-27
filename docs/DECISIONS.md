@@ -70,3 +70,15 @@ Dependabot ignores the held-back majors (TypeScript ≥ 6.1, ESLint ≥ 10, `@ty
 **Context:** Breathwise is India-only. After GPS succeeds, BigDataCloud's `countryCode` tells us whether the user is in India. If that call fails (network, fair-use limit, or an empty `countryCode`), we cannot confirm the country. `ARCHITECTURE.md §6` said to show "Near 28.61, 77.21" and continue, which would let a location outside India through.
 **Decision:** Fall back to a coarse India bounding box: latitude 6–37.5, longitude 68–97.5. Inside it, continue with the label "Near 28.61, 77.21 (place name unavailable)" and keep the search box visible so the user can pick a named place. Outside it, show the India-only message. A successful reverse geocode always wins over the box.
 **Consequences:** No extra dependency or data file. The box also covers parts of Pakistan, Nepal, Bhutan, Bangladesh, Myanmar and Sri Lanka, so it is a sanity check, not proof of location; the "place name unavailable" label and the visible search box make that clear. Open-Meteo still returns valid data anywhere, so nothing breaks if a border-area user slips through.
+
+## ADR-011 NAQI conventions and emission-factor sources
+**Status:** Accepted · 2026-11-27
+**Context:** Phase 3 checked every NAQI value against CPCB's 2014 report (Table 3.11) and every emission factor against India-specific sources. CPCB leaves some rules open: the Severe band has no upper bound, and there is no rule for 8-hour data sufficiency. The India GHG road factors don't cover metro, and the profile doesn't record car size or AC.
+**Decision:**
+1. Breakpoints exactly as R Table 3.11, with continuous bands. Severe upper bounds from the CPCB-hosted calculator reproduction (PM10 510, PM2.5 380, NO₂ 520, O₃ 1000, CO 50, SO₂ 2620), labelled as a convention; above them the index caps at 500.
+2. Apply the Table 3.11 O₃ footnote: above 208 µg/m³ (8-hour), use the 1-hour value.
+3. O₃ and CO use the latest 8-hour mean with ≥ 6 of 8 valid hours (convention).
+4. Road factors from the India GHG Program (2015, v1.0): petrol and diesel hatchback <1400 cc, CNG small <800 cc (the only CNG row; it overstates CNG savings vs petrol), scooter <110 cc, CNG auto, intra-city bus per passenger-km.
+5. Metro = UNEP-DTU energy intensity (back-calculated, 0.061 ÷ 0.943 kWh/pkm) × CEA v22.0 FY 2025-26 grid factor (0.675 tCO₂/MWh) ≈ 0.0437 kg/pkm, with the system-boundary caveat (power generation vs tailpipe) stated in every metro fact.
+6. Impact facts carry a signed weekly delta, and exposure benefits are separate facts (metro and WFH only; bus stays above ambient in Goel et al. 2015).
+**Consequences:** Every number in `AQI_AND_RULES.md` has a "Source status": verified (R/H), CPCB-adjacent (X), or Breathwise convention. Category results never depend on the conventions; only exact values within 401–500 and per-km CO₂ do. Revisit when CPCB revises the AQI method (it is under review) or the India GHG Program publishes a final road paper.
