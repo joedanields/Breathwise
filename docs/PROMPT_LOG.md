@@ -75,6 +75,14 @@ Latency 2.0–3.2 s.
 
 ---
 
+## v1.4 — 2026-11-28 — Name the two indices precisely (plan rule 16, chat)
+
+**Changed:** Plan rule 16 and the same line in the chat prompt: the India AQI is `naqi.value` ("India AQI (estimated)"), the US AQI is `current.usAqi`; never call the US AQI just "AQI".
+**Why:** The first production plan (S1, 4.1 s, 200) and the v1.3 local runs said "PM2.5 is 103 µg/m³ with an AQI of 197": 197 is the US AQI, while the India AQI was 300. Grounded (the number is in FACTS) but misleading in an India-AQI app.
+**Result (S1, S5, S6, local):** ✅ grounded first try 3/3; ✅ "The India AQI is estimated at 300 … The US AQI is 197", "India AQI (estimated) of 300". Second and final prompt iteration of this run.
+
+---
+
 ## Build-time prompts (Claude Code)
 
 | Date | Phase | Prompt (summary) | Outcome |
