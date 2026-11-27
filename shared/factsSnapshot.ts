@@ -72,6 +72,12 @@ export const HouseholdProfileSchema = z.strictObject({
       returns: ClockTime.optional(),
       oneWayKm: z.number().positive().max(200).optional(),
       daysPerWeek: z.number().int().min(1).max(7).optional(),
+      /** Cars only: whether the car is driven with AC and windows closed (Goel et al. 2015). */
+      carAc: z.enum(['ac_closed', 'windows_open']).optional(),
+    })
+    .refine((commute) => commute.carAc === undefined || commute.mode.startsWith('car_'), {
+      error: 'carAc applies to car modes only',
+      path: ['carAc'],
     })
     .optional(),
   home: z

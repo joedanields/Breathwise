@@ -7,7 +7,12 @@ import {
   EMISSION_FACTORS,
   METRO_KWH_PER_PKM,
 } from '@/lib/impact/emissionFactors';
-import { hasExposureBenefit, IN_TRANSIT_EXPOSURE_RATIO } from '@/lib/impact/exposure';
+import {
+  hasExposureBenefit,
+  IN_TRANSIT_EXPOSURE_RATIO,
+  inTransitExposureRatio,
+  CAR_EXPOSURE_RATIO,
+} from '@/lib/impact/exposure';
 
 type Commute = NonNullable<HouseholdProfile['commute']>;
 const MODES: CommuteMode[] = [
@@ -160,7 +165,9 @@ describe('exposureBenefit facts (Goel et al. 2015)', () => {
     [1.3, 1.2, false, false], // two-wheeler -> bus: still above ambient
     [0.8, 0.8, false, false], // no improvement
     [1.1, null, false, false], // unknown destination ratio
-    [1.1, null, true, true], // trip removed (WFH)
+    [1.1, null, true, true], // trip removed (WFH) from an above-ambient commute
+    [0.5, null, true, false], // WFH instead of an AC car: below ambient, no claim
+    [1, null, true, false], // exactly ambient: no claim
   ] as const)(
     'hasExposureBenefit(%f -> %s, removesTrip %s) = %s',
     (from, to, removes, expected) => {
@@ -191,6 +198,48 @@ describe('exposureBenefit facts (Goel et al. 2015)', () => {
       exposureRatioTo: 0.8,
     });
     expect(co2(facts, 'co2_metro').kgCo2PerWeekDelta).toBeGreaterThan(0);
+  });
+
+  it('uses the car AC setting: AC closed 0.5×, windows open 1.3×, unknown null', () => {
+    expect(CAR_EXPOSURE_RATIO).toEqual({ ac_closed: 0.5, windows_open: 1.3 });
+    expect(inTransitExposureRatio('car_petrol', 'ac_closed')).toBe(0.5);
+    expect(inTransitExposureRatio('car_diesel', 'windows_open')).toBe(1.3);
+    expect(inTransitExposureRatio('car_cng', undefined)).toBeNull();
+    expect(inTransitExposureRatio('walk', 'ac_closed')).toBe(1.4); // carAc ignored off-car
+  });
+
+  it('open-window car: metro and one fewer commuting day are exposure benefits', () => {
+    const facts = commuteImpactFacts({
+      mode: 'car_petrol',
+      carAc: 'windows_open',
+      oneWayKm: 3,
+      daysPerWeek: 5,
+    });
+    expect(facts.find((f) => f.id === 'exposure_metro')).toMatchObject({
+      exposureRatioFrom: 1.3,
+      exposureRatioTo: 0.8,
+    });
+    expect(facts.find((f) => f.id === 'exposure_wfh_extra_day')).toMatchObject({
+      exposureRatioFrom: 1.3,
+      exposureRatioTo: null,
+    });
+  });
+
+  it('AC car: no exposure benefit for metro (0.8 > 0.5) or one fewer commuting day', () => {
+    const facts = commuteImpactFacts({
+      mode: 'car_diesel',
+      carAc: 'ac_closed',
+      oneWayKm: 18,
+      daysPerWeek: 2,
+    });
+    expect(facts.filter((f) => f.category === 'exposureBenefit')).toEqual([]);
+  });
+
+  it('names the WFH alternative as one fewer commuting day', () => {
+    const facts = commuteImpactFacts({ mode: 'bus', oneWayKm: 8, daysPerWeek: 5 });
+    expect(co2(facts, 'co2_wfh_extra_day').description).toMatch(
+      /^One fewer commuting day a week \(e\.g\. working from home\)/,
+    );
   });
 
   it('does not claim an exposure benefit for buses (above ambient in the study)', () => {

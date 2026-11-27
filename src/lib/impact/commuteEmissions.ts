@@ -4,7 +4,7 @@ import {
   EXPOSURE_SOURCE,
   EXPOSURE_SOURCE_URL,
   hasExposureBenefit,
-  IN_TRANSIT_EXPOSURE_RATIO,
+  inTransitExposureRatio,
 } from './exposure';
 
 type Commute = NonNullable<HouseholdProfile['commute']>;
@@ -113,12 +113,12 @@ export function commuteImpactFacts(commute: Commute | undefined): ImpactFact[] {
   alternatives.push({
     id: 'co2_wfh_extra_day',
     mode: 'wfh',
-    phrase: 'Working from home one more day',
+    phrase: 'One fewer commuting day a week (e.g. working from home)',
     kg: weeklyCommuteKg(mode, oneWayKm, daysPerWeek - 1),
     removesTrip: true,
   });
 
-  const fromRatio = IN_TRANSIT_EXPOSURE_RATIO[mode];
+  const fromRatio = inTransitExposureRatio(mode, commute.carAc);
   for (const alt of alternatives) {
     const kg = round2(alt.kg);
     const delta = round2(kg - currentKg);
@@ -134,7 +134,7 @@ export function commuteImpactFacts(commute: Commute | undefined): ImpactFact[] {
       sourceUrl: altFactor.sourceUrl,
     });
 
-    const toRatio = alt.removesTrip ? null : IN_TRANSIT_EXPOSURE_RATIO[alt.mode];
+    const toRatio = alt.removesTrip ? null : inTransitExposureRatio(alt.mode, undefined);
     if (
       alt.mode !== mode &&
       fromRatio !== null &&

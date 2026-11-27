@@ -129,6 +129,15 @@ describe('findBestWindows', () => {
     ).toBe(true);
   });
 
+  it('keeps at least 1 hour between W1 and W2 (and X1 and X2)', () => {
+    const hourly = series((i) =>
+      i === 14 ? 10 : i === 15 ? 12 : i === 17 ? 30 : i === 8 ? 300 : i === 9 ? 290 : 90,
+    );
+    const { best, worst } = findBestWindows(hourly, { fromIndex: 0 });
+    expect(best.map((w) => w.start.slice(11, 16))).toEqual(['14:00', '17:00']); // 15:00 is adjacent
+    expect(worst.map((w) => w.start.slice(11, 16))).toEqual(['08:00', '06:00']); // 09:00 is adjacent
+  });
+
   it('stays within the horizon and after fromIndex', () => {
     const hourly = series((i) => (i === 8 ? 1 : i === 40 ? 2 : 90)); // 08:00 today, 16:00 tomorrow
     const { best } = findBestWindows(hourly, { fromIndex: 9, horizonH: 24 });
@@ -149,9 +158,10 @@ describe('findBestWindows', () => {
       series(() => 70),
       { fromIndex: 0 },
     );
+    // W2 must start at least 1 h after W1 ends, so 07:00 is skipped.
     expect(best.map((w) => w.start)).toEqual([
       '2026-11-27T06:00:00+05:30',
-      '2026-11-27T07:00:00+05:30',
+      '2026-11-27T08:00:00+05:30',
     ]);
     expect(worst.map((w) => w.label)).toEqual(['X1', 'X2']);
   });

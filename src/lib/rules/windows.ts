@@ -56,8 +56,14 @@ function candidates(hourly: HourlyPm25, options: Required<WindowSearch>): Candid
   return found;
 }
 
-/** Greedy pick of non-overlapping windows; `order` decides preference, earlier start breaks ties. */
-function pickNonOverlapping(
+/** At least this many hours between W1 and W2 (and X1 and X2), so W2 is a real alternative. */
+export const MIN_GAP_BETWEEN_WINDOWS_H = 1;
+
+/**
+ * Greedy pick of windows at least MIN_GAP_BETWEEN_WINDOWS_H apart; `order` decides
+ * preference, earlier start breaks ties.
+ */
+function pickSeparated(
   list: Candidate[],
   order: (a: Candidate, b: Candidate) => number,
   max: number,
@@ -66,12 +72,13 @@ function pickNonOverlapping(
   const picked: Candidate[] = [];
   for (const candidate of sorted) {
     if (picked.length === max) break;
-    const overlaps = picked.some(
+    const gap = MIN_GAP_BETWEEN_WINDOWS_H;
+    const tooClose = picked.some(
       (p) =>
-        candidate.startIndex < p.startIndex + p.durationH &&
-        p.startIndex < candidate.startIndex + candidate.durationH,
+        candidate.startIndex < p.startIndex + p.durationH + gap &&
+        p.startIndex < candidate.startIndex + candidate.durationH + gap,
     );
-    if (!overlaps) picked.push(candidate);
+    if (!tooClose) picked.push(candidate);
   }
   return picked;
 }
@@ -101,7 +108,7 @@ export function findBestWindows(
   const label = (prefix: string) => (c: Candidate, i: number) =>
     toTimeWindow(hourly, c.startIndex, c.durationH, c.avg, `${prefix}${String(i + 1)}`);
   return {
-    best: pickNonOverlapping(all, (a, b) => a.avg - b.avg, options.maxResults).map(label('W')),
-    worst: pickNonOverlapping(all, (a, b) => b.avg - a.avg, options.maxResults).map(label('X')),
+    best: pickSeparated(all, (a, b) => a.avg - b.avg, options.maxResults).map(label('W')),
+    worst: pickSeparated(all, (a, b) => b.avg - a.avg, options.maxResults).map(label('X')),
   };
 }

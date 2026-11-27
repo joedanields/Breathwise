@@ -171,6 +171,13 @@ describe('HouseholdProfileSchema', () => {
     expect(HouseholdProfileSchema.safeParse(tooLong).success).toBe(false);
   });
 
+  it('accepts carAc for cars only', () => {
+    const car = { ...profile, commute: { mode: 'car_petrol', carAc: 'windows_open' } };
+    const bike = { ...profile, commute: { mode: 'two_wheeler', carAc: 'ac_closed' } };
+    expect(HouseholdProfileSchema.safeParse(car).success).toBe(true);
+    expect(HouseholdProfileSchema.safeParse(bike).success).toBe(false);
+  });
+
   it('rejects an unknown commute mode', () => {
     const bad = { ...profile, commute: { mode: 'helicopter' } };
     expect(HouseholdProfileSchema.safeParse(bad).success).toBe(false);
