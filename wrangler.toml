@@ -4,17 +4,26 @@ name = "breathwise"
 pages_build_output_dir = "dist"
 compatibility_date = "2026-11-01"
 
-# Per-IP + daily rate limiting for /api/advise (docs/SECURITY.md §3).
-# TODO(Phase 9): replace both placeholder ids with the real ones from
-#   npx wrangler kv namespace create RATE_LIMIT_KV
-#   npx wrangler kv namespace create RATE_LIMIT_KV --preview
-# Local `wrangler pages dev` simulates KV, so the placeholders work for development.
+# Production. Per-IP + daily rate limiting for /api/advise (docs/SECURITY.md §3).
+# KV ids are identifiers, not secrets.
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "00000000000000000000000000000000"
-preview_id = "00000000000000000000000000000001"
+id = "250e22da7d1047548b6caa7f2708bda8"
 
 [vars]
 # Latest stable Flash at build time; gemini-3.5-flash-lite is the cheaper fallback (DATA_SOURCES.md §5).
 GEMINI_MODEL = "gemini-3.8-flash"
-ALLOWED_ORIGINS = "https://breathwise.pages.dev,http://localhost:5173,http://localhost:8788"
+# Comma-separated. An entry starting with "https://*." is a suffix match on the host
+# (preview deploys are https://<hash>.breathwise.pages.dev).
+ALLOWED_ORIGINS = "https://breathwise.pages.dev,https://*.breathwise.pages.dev,http://localhost:5173,http://localhost:8788"
+
+# Preview deploys (non-production branches). Pages does not inherit kv_namespaces or vars
+# into an environment, so both are repeated here with a separate KV namespace.
+[env.preview]
+[[env.preview.kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "ffaf36aa1e714e3ead361e7e51782511"
+
+[env.preview.vars]
+GEMINI_MODEL = "gemini-3.8-flash"
+ALLOWED_ORIGINS = "https://breathwise.pages.dev,https://*.breathwise.pages.dev,http://localhost:5173,http://localhost:8788"
