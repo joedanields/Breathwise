@@ -1,4 +1,4 @@
-import type { ChatTurn } from '@shared/advice/requestSchema';
+import type { AdviceError, ChatTurn } from '@shared/advice/requestSchema';
 import { MAX_HISTORY_TURNS, MAX_QUESTION_CHARS } from '@shared/config';
 import type { FactsSnapshot } from '@shared/types';
 import { useRef, useState } from 'react';
@@ -14,18 +14,27 @@ export interface ChatMessage {
 
 export const MIN_QUESTION_CHARS = 2;
 
-const NOTICES = {
-  rate_limited: 'Too many requests, try again in a minute.',
-  auth: 'Your Gemini key was rejected; check it in Settings.',
-  default: "Breathwise couldn't answer right now. Please try again in a moment.",
-} as const;
+/** Longest history turn sent back to the server (matches the request schema). */
+const MAX_HISTORY_TURN_CHARS = 2000;
+
+/** The notice shown in the log when a chat request fails. */
+export function noticeFor(error: AdviceError | undefined): string {
+  switch (error) {
+    case 'rate_limited':
+      return 'Too many requests, try again in a minute.';
+    case 'auth':
+      return 'Your Gemini key was rejected; check it in Settings.';
+    default:
+      return "Breathwise couldn't answer right now. Please try again in a moment.";
+  }
+}
 
 /** The last ≤ 6 turns, oldest first (AI_DESIGN.md §1). */
 export function historyForRequest(messages: readonly ChatMessage[]): ChatTurn[] {
   return messages
     .filter((m): m is ChatMessage & { role: 'user' | 'model' } => m.role !== 'notice')
     .slice(-MAX_HISTORY_TURNS)
-    .map((m) => ({ role: m.role, text: m.text.slice(0, 2000) }));
+    .map((m) => ({ role: m.role, text: m.text.slice(0, MAX_HISTORY_TURN_CHARS) }));
 }
 
 export function validateQuestion(text: string): string | null {
@@ -68,17 +77,9 @@ export function useChat(snapshot: FactsSnapshot) {
       );
       return;
     }
-    const error = result.ok ? 'default' : result.error;
+    const error = result.ok ? undefined : result.error;
     if (error === 'auth' && byok) byokStore.set({ ...byok, rejected: true });
-    setMessages(
-      add(
-        {
-          role: 'notice',
-          text: error in NOTICES ? NOTICES[error as keyof typeof NOTICES] : NOTICES.default,
-        },
-        withQuestion,
-      ),
-    );
+    setMessages(add({ role: 'notice', text: noticeFor(error) }, withQuestion));
   }
 
   return { messages, pending, ask };

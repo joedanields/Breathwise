@@ -2,6 +2,11 @@ import { useId, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { byokStore, useByok } from './byok';
 
+/** Shortest input accepted as a full API key; catches pastes that lost characters. */
+const MIN_KEY_LENGTH = 10;
+
+const ERROR_TEXT = 'font-medium text-aqi-very-poor dark:text-text';
+
 /**
  * "Use my own Gemini key" (UI_UX.md §4 ByokField): password input, show/hide,
  * clear. Stored in sessionStorage only and sent straight to Google, never to us.
@@ -9,17 +14,7 @@ import { byokStore, useByok } from './byok';
 export function ByokField() {
   const id = useId();
   const byok = useByok();
-  const [value, setValue] = useState('');
-  const [visible, setVisible] = useState(false);
-  const [error, setError] = useState('');
-  const inputId = `${id}-key`;
   const hintId = `${id}-hint`;
-  const errorId = `${id}-error`;
-  const message =
-    error ||
-    (byok?.rejected
-      ? 'Gemini rejected this key. Check it, or clear it to use the Breathwise server.'
-      : '');
 
   return (
     <section aria-labelledby={`${id}-heading`} className="space-y-2">
@@ -30,76 +25,87 @@ export function ByokField() {
         Optional. Kept only in this browser tab (cleared when you close it) and sent directly to
         Google, never to the Breathwise server.
       </p>
-      {byok ? (
-        <div className="space-y-2">
-          <p className="font-medium">
-            A key is saved for this tab{byok.rejected ? ' (rejected)' : ''}.
-          </p>
-          {message && (
-            <p id={errorId} className="font-medium text-aqi-very-poor dark:text-text">
-              {message}
-            </p>
-          )}
-          <Button
-            variant="secondary"
-            onClick={() => {
-              byokStore.clear();
-              setError('');
-            }}
-          >
-            Clear key
-          </Button>
-        </div>
-      ) : (
-        <form
-          className="space-y-2"
-          onSubmit={(event) => {
-            event.preventDefault();
-            const key = value.trim();
-            if (key.length < 10) {
-              setError('Enter the full API key.');
-              return;
-            }
-            byokStore.set({ apiKey: key, rejected: false });
-            setValue('');
-            setError('');
+      {byok ? <SavedKey rejected={byok.rejected} /> : <KeyForm id={id} hintId={hintId} />}
+    </section>
+  );
+}
+
+function SavedKey({ rejected }: { rejected: boolean }) {
+  return (
+    <div className="space-y-2">
+      <p className="font-medium">A key is saved for this tab{rejected ? ' (rejected)' : ''}.</p>
+      {rejected && (
+        <p className={ERROR_TEXT}>
+          Gemini rejected this key. Check it, or clear it to use the Breathwise server.
+        </p>
+      )}
+      <Button
+        variant="secondary"
+        onClick={() => {
+          byokStore.clear();
+        }}
+      >
+        Clear key
+      </Button>
+    </div>
+  );
+}
+
+function KeyForm({ id, hintId }: { id: string; hintId: string }) {
+  const [value, setValue] = useState('');
+  const [visible, setVisible] = useState(false);
+  const [error, setError] = useState('');
+  const inputId = `${id}-key`;
+  const errorId = `${id}-error`;
+
+  return (
+    <form
+      className="space-y-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const key = value.trim();
+        if (key.length < MIN_KEY_LENGTH) {
+          setError('Enter the full API key.');
+          return;
+        }
+        byokStore.set({ apiKey: key, rejected: false });
+        setValue('');
+        setError('');
+      }}
+    >
+      <label htmlFor={inputId} className="block font-medium">
+        Gemini API key
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <input
+          id={inputId}
+          type={visible ? 'text' : 'password'}
+          autoComplete="off"
+          spellCheck={false}
+          value={value}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={[hintId, error ? errorId : ''].filter(Boolean).join(' ')}
+          onChange={(event) => {
+            setValue(event.target.value);
+          }}
+          className="min-h-11 flex-1 rounded-md border border-muted bg-surface px-3 text-text"
+        />
+        <Button
+          variant="secondary"
+          aria-pressed={visible}
+          onClick={() => {
+            setVisible(!visible);
           }}
         >
-          <label htmlFor={inputId} className="block font-medium">
-            Gemini API key
-          </label>
-          <div className="flex flex-wrap gap-2">
-            <input
-              id={inputId}
-              type={visible ? 'text' : 'password'}
-              autoComplete="off"
-              spellCheck={false}
-              value={value}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={[hintId, error ? errorId : ''].filter(Boolean).join(' ')}
-              onChange={(event) => {
-                setValue(event.target.value);
-              }}
-              className="min-h-11 flex-1 rounded-md border border-muted bg-surface px-3 text-text"
-            />
-            <Button
-              variant="secondary"
-              aria-pressed={visible}
-              onClick={() => {
-                setVisible(!visible);
-              }}
-            >
-              {visible ? 'Hide' : 'Show'}
-            </Button>
-          </div>
-          {error && (
-            <p id={errorId} className="font-medium text-aqi-very-poor dark:text-text">
-              {error}
-            </p>
-          )}
-          <Button type="submit">Save key for this tab</Button>
-        </form>
+          {visible ? 'Hide' : 'Show'}
+        </Button>
+      </div>
+      {error && (
+        <p id={errorId} className={ERROR_TEXT}>
+          {error}
+        </p>
       )}
-    </section>
+      <Button type="submit">Save key for this tab</Button>
+    </form>
   );
 }
