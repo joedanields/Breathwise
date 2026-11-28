@@ -4,7 +4,11 @@
 // Relative imports only: Wrangler bundles this file without the app's path aliases.
 import '../../shared/zodConfig';
 import { runAdvice } from '../../shared/advice/advise';
-import { type AdviceError, AdviceRequestSchema } from '../../shared/advice/requestSchema';
+import {
+  type AdviceError,
+  type AdviceRequest,
+  AdviceRequestSchema,
+} from '../../shared/advice/requestSchema';
 import {
   DAILY_REQUEST_CAP,
   DEFAULT_MODEL,
@@ -102,70 +106,86 @@ async function rateLimited(
   return null;
 }
 
+/** A request check that either passes a value on or ends with an error response. */
+type Checked<T> = { ok: true; value: T } | { ok: false; response: Response };
+
+/** Steps 1–3: method, origin and content type. Returns the error response, or null to continue. */
+function rejectRequest(request: Request, env: Env): Response | null {
+  if (request.method !== 'POST') return fail('method_not_allowed', { Allow: 'POST' });
+  if (!isAllowedOrigin(request.headers.get('Origin'), env.ALLOWED_ORIGINS ?? '')) {
+    return fail('forbidden');
+  }
+  const contentType = (request.headers.get('Content-Type') ?? '').toLowerCase();
+  if (!contentType.startsWith('application/json')) return fail('unsupported_media_type');
+  return null;
+}
+
+/** Steps 4–5: size limit (declared, then actual), JSON parsing and Zod validation. */
+async function readAdviceRequest(request: Request): Promise<Checked<AdviceRequest>> {
+  const tooLarge = { ok: false, response: fail('payload_too_large') } as const;
+  if (Number(request.headers.get('Content-Length') ?? 0) > MAX_BODY_BYTES) return tooLarge;
+  const raw = await request.text();
+  if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) return tooLarge;
+  let body: unknown;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    return { ok: false, response: fail('bad_request') };
+  }
+  const parsed = AdviceRequestSchema.safeParse(body);
+  return parsed.success
+    ? { ok: true, value: parsed.data }
+    : { ok: false, response: fail('bad_request') };
+}
+
+/** The configured model; an empty GEMINI_MODEL counts as unset. */
+function resolveModel(env: Env): string {
+  const configured = (env.GEMINI_MODEL ?? '').trim();
+  return configured === '' ? DEFAULT_MODEL : configured;
+}
+
+/** Steps 7–8: Gemini (with timeout), output validation and the grounding guard. */
+async function adviseResponse(
+  advice: AdviceRequest,
+  deps: { apiKey: string; model: string; timeoutMs: number },
+): Promise<Response> {
+  const started = Date.now();
+  const outcome = await runAdvice(advice, deps);
+  if (outcome.ok) {
+    const { mode, data, model } = outcome;
+    return json({ ok: true, mode, data, model, cached: false });
+  }
+  // Failures only, for diagnosis: no profile, no prompt, no key.
+  log.warn(
+    JSON.stringify({
+      route: 'advise',
+      mode: advice.mode,
+      model: deps.model,
+      ms: Date.now() - started,
+      result: outcome.reason,
+    }),
+  );
+  // A rejected server key is an upstream problem for the user; never expose auth detail.
+  return fail(outcome.error === 'auth' ? 'upstream' : outcome.error);
+}
+
+/** Builds the POST /api/advise handler; tests pass a short Gemini timeout. */
 export function createHandler({ timeoutMs = GEMINI_TIMEOUT_MS }: { timeoutMs?: number } = {}) {
   return async function handle({ request, env }: Context): Promise<Response> {
-    // 1. Method
-    if (request.method !== 'POST') return fail('method_not_allowed', { Allow: 'POST' });
-    // 2. Origin
-    if (!isAllowedOrigin(request.headers.get('Origin'), env.ALLOWED_ORIGINS ?? ''))
-      return fail('forbidden');
-    // 3. Content type
-    if (!(request.headers.get('Content-Type') ?? '').toLowerCase().startsWith('application/json')) {
-      return fail('unsupported_media_type');
-    }
-    // 4. Size (declared, then actual)
-    if (Number(request.headers.get('Content-Length') ?? 0) > MAX_BODY_BYTES)
-      return fail('payload_too_large');
-    const raw = await request.text();
-    if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) return fail('payload_too_large');
-    // 5. Validate
-    let body: unknown;
-    try {
-      body = JSON.parse(raw) as unknown;
-    } catch {
-      return fail('bad_request');
-    }
-    const parsed = AdviceRequestSchema.safeParse(body);
-    if (!parsed.success) return fail('bad_request');
+    const rejected = rejectRequest(request, env);
+    if (rejected) return rejected;
+    const advice = await readAdviceRequest(request);
+    if (!advice.ok) return advice.response;
     // 6. Rate limit
-    const limit = await rateLimited(
-      env.RATE_LIMIT_KV,
-      request.headers.get('CF-Connecting-IP') ?? 'unknown',
-    );
+    const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+    const limit = await rateLimited(env.RATE_LIMIT_KV, ip);
     if (limit) return fail('rate_limited', { 'Retry-After': limit === 'minute' ? '60' : '3600' });
-    // 7–8. Gemini (timeout) + output validation + grounding guard
     if (!env.GEMINI_API_KEY) {
       log.error('advise: GEMINI_API_KEY is not configured');
       return fail('upstream');
     }
-    // An empty GEMINI_MODEL counts as unset.
-    const configured = (env.GEMINI_MODEL ?? '').trim();
-    const model = configured === '' ? DEFAULT_MODEL : configured;
-    const started = Date.now();
-    const outcome = await runAdvice(parsed.data, { apiKey: env.GEMINI_API_KEY, model, timeoutMs });
-    if (!outcome.ok) {
-      // Failures only, for diagnosis: no profile, no prompt, no key.
-      log.warn(
-        JSON.stringify({
-          route: 'advise',
-          mode: parsed.data.mode,
-          model,
-          ms: Date.now() - started,
-          result: outcome.reason,
-        }),
-      );
-    }
-    if (!outcome.ok) {
-      // A rejected server key is an upstream problem for the user; never expose auth detail.
-      return fail(outcome.error === 'auth' ? 'upstream' : outcome.error);
-    }
-    return json({
-      ok: true,
-      mode: outcome.mode,
-      data: outcome.data,
-      model: outcome.model,
-      cached: false,
-    });
+    const deps = { apiKey: env.GEMINI_API_KEY, model: resolveModel(env), timeoutMs };
+    return adviseResponse(advice.value, deps);
   };
 }
 
