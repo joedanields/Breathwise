@@ -158,45 +158,37 @@ function compact<T extends object>(value: T): T {
   return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as T;
 }
 
-/**
- * Converts a validated draft to a HouseholdProfile. With `includeDayHome: false`
- * ("Skip for now"), step 3 is ignored and defaults apply (no masks, English).
- */
-export function draftToProfile(
-  draft: ProfileDraft,
-  { includeDayHome }: { includeDayHome: boolean },
-): HouseholdProfile {
-  const members: Member[] = draft.members.map((m) =>
-    compact({
-      id: m.id,
-      label: m.label.trim(),
-      ageBand: m.ageBand as AgeBand,
-      conditions: m.conditions,
-      outdoorActivity:
-        m.hasActivity && m.activityKind !== ''
-          ? {
-              kind: m.activityKind,
-              usualStart: m.activityStart,
-              durationMin: Number(m.activityDurationMin),
-            }
-          : undefined,
-    }),
-  );
-  const base: HouseholdProfile = { personas: draft.personas, members, masks: [], language: 'en' };
-  if (!includeDayHome) return base;
+function memberFromDraft(m: MemberDraft): Member {
+  return compact({
+    id: m.id,
+    label: m.label.trim(),
+    ageBand: m.ageBand as AgeBand,
+    conditions: m.conditions,
+    outdoorActivity:
+      m.hasActivity && m.activityKind !== ''
+        ? {
+            kind: m.activityKind,
+            usualStart: m.activityStart,
+            durationMin: Number(m.activityDurationMin),
+          }
+        : undefined,
+  });
+}
 
-  const commute =
-    draft.commuteMode === ''
-      ? undefined
-      : compact({
-          mode: draft.commuteMode,
-          carAc: isCar(draft.commuteMode) && draft.carAc !== '' ? draft.carAc : undefined,
-          departs: present(draft.departs),
-          returns: present(draft.returns),
-          oneWayKm: numberOrUndefined(draft.oneWayKm),
-          daysPerWeek: numberOrUndefined(draft.daysPerWeek),
-        });
+function commuteFromDraft(draft: ProfileDraft): HouseholdProfile['commute'] {
+  if (draft.commuteMode === '') return undefined;
+  return compact({
+    mode: draft.commuteMode,
+    carAc: isCar(draft.commuteMode) && draft.carAc !== '' ? draft.carAc : undefined,
+    departs: present(draft.departs),
+    returns: present(draft.returns),
+    oneWayKm: numberOrUndefined(draft.oneWayKm),
+    daysPerWeek: numberOrUndefined(draft.daysPerWeek),
+  });
+}
 
+function homeFromDraft(draft: ProfileDraft): HouseholdProfile['home'] {
+  if (draft.homeType === '') return undefined;
   const purifier =
     draft.purifier === ''
       ? undefined
@@ -205,18 +197,32 @@ export function draftToProfile(
           cadrM3h: draft.purifier === 'yes' ? numberOrUndefined(draft.cadrM3h) : undefined,
           roomM2: numberOrUndefined(draft.roomM2),
         });
+  return compact({
+    type: draft.homeType,
+    purifier,
+    ac: draft.ac === '' ? undefined : draft.ac === 'yes',
+    cookingFuel: draft.cookingFuel === '' ? undefined : draft.cookingFuel,
+  });
+}
 
-  const home =
-    draft.homeType === ''
-      ? undefined
-      : compact({
-          type: draft.homeType,
-          purifier,
-          ac: draft.ac === '' ? undefined : draft.ac === 'yes',
-          cookingFuel: draft.cookingFuel === '' ? undefined : draft.cookingFuel,
-        });
-
-  return compact({ ...base, commute, home, masks: draft.masks, language: draft.language });
+/**
+ * Converts a validated draft to a HouseholdProfile. With `includeDayHome: false`
+ * ("Skip for now"), step 3 is ignored and defaults apply (no masks, English).
+ */
+export function draftToProfile(
+  draft: ProfileDraft,
+  { includeDayHome }: { includeDayHome: boolean },
+): HouseholdProfile {
+  const members = draft.members.map(memberFromDraft);
+  const base: HouseholdProfile = { personas: draft.personas, members, masks: [], language: 'en' };
+  if (!includeDayHome) return base;
+  return compact({
+    ...base,
+    commute: commuteFromDraft(draft),
+    home: homeFromDraft(draft),
+    masks: draft.masks,
+    language: draft.language,
+  });
 }
 
 const text = (value: number | string | undefined) => (value === undefined ? '' : String(value));

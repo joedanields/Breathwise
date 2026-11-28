@@ -33,6 +33,28 @@ interface BaseProps {
   error?: string | undefined;
 }
 
+/** aria-invalid and aria-describedby for a control with an optional hint and error. */
+function a11yProps(id: string, hint: string | undefined, error: string | undefined) {
+  return {
+    'aria-invalid': error ? true : undefined,
+    'aria-describedby': describedBy(hint && `${id}-hint`, error && `${id}-error`),
+  };
+}
+
+/** Label, hint and error around one native control. */
+function FieldShell({ id, label, hint, error, children }: BaseProps & { children: ReactNode }) {
+  return (
+    <div>
+      <label htmlFor={id} className="block font-medium">
+        {label}
+      </label>
+      {hint && <Hint id={`${id}-hint`} hint={hint} />}
+      {children}
+      {error && <Message id={`${id}-error`} error={error} />}
+    </div>
+  );
+}
+
 interface TextFieldProps extends BaseProps {
   value: string;
   onChange: (value: string) => void;
@@ -55,11 +77,7 @@ export function TextField({
   autoComplete = 'off',
 }: TextFieldProps) {
   return (
-    <div>
-      <label htmlFor={id} className="block font-medium">
-        {label}
-      </label>
-      {hint && <Hint id={`${id}-hint`} hint={hint} />}
+    <FieldShell id={id} label={label} hint={hint} error={error}>
       <input
         id={id}
         type={type}
@@ -67,15 +85,13 @@ export function TextField({
         maxLength={maxLength}
         autoComplete={autoComplete}
         value={value}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(hint && `${id}-hint`, error && `${id}-error`)}
+        {...a11yProps(id, hint, error)}
         onChange={(event) => {
           onChange(event.target.value);
         }}
         className={CONTROL}
       />
-      {error && <Message id={`${id}-error`} error={error} />}
-    </div>
+    </FieldShell>
   );
 }
 
@@ -97,16 +113,11 @@ export function SelectField<T extends string>({
   placeholder = 'Choose…',
 }: SelectFieldProps<T>) {
   return (
-    <div>
-      <label htmlFor={id} className="block font-medium">
-        {label}
-      </label>
-      {hint && <Hint id={`${id}-hint`} hint={hint} />}
+    <FieldShell id={id} label={label} hint={hint} error={error}>
       <select
         id={id}
         value={value}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(hint && `${id}-hint`, error && `${id}-error`)}
+        {...a11yProps(id, hint, error)}
         onChange={(event) => {
           onChange(event.target.value as T | '');
         }}
@@ -119,8 +130,7 @@ export function SelectField<T extends string>({
           </option>
         ))}
       </select>
-      {error && <Message id={`${id}-error`} error={error} />}
-    </div>
+    </FieldShell>
   );
 }
 
@@ -146,8 +156,7 @@ function ChoiceFieldset({
     <fieldset
       id={id}
       tabIndex={-1}
-      aria-invalid={error ? true : undefined}
-      aria-describedby={describedBy(hint && `${id}-hint`, error && `${id}-error`)}
+      {...a11yProps(id, hint, error)}
       className="focus:outline-none"
     >
       <legend className="font-medium">{legend}</legend>
