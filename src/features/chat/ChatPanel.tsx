@@ -25,8 +25,7 @@ export default function ChatPanel({ snapshot }: { snapshot: FactsSnapshot }) {
         aria-live="polite"
         aria-label="Conversation"
         className="max-h-96 space-y-2 overflow-y-auto"
-        // A scrollable log must be keyboard-focusable (WCAG 2.1.1).
-        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        // A scrollable log must be keyboard-focusable (WCAG 2.1.1); allowed in eslint.config.js.
         tabIndex={0}
       >
         {messages.length === 0 && (

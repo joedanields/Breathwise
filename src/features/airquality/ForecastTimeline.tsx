@@ -100,7 +100,6 @@ export function ForecastTimeline({ hours, timeZone }: ForecastTimelineProps) {
           role="region"
           aria-label="48-hour PM2.5 timeline, scrolls sideways"
           // A scrollable region must be keyboard-focusable (WCAG 2.1.1, axe scrollable-region-focusable).
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
           tabIndex={0}
           className="mt-3 overflow-x-auto pb-2"
         >

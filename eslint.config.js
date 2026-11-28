@@ -57,6 +57,13 @@ export default defineConfig([
     ],
     languageOptions: { globals: globals.browser },
     rules: {
+      // Scrollable containers (the forecast timeline region and the chat log) must be
+      // keyboard-focusable so keyboard users can scroll them (WCAG 2.1.1, axe
+      // scrollable-region-focusable). Allow tabIndex on those roles only.
+      'jsx-a11y/no-noninteractive-tabindex': [
+        'error',
+        { tags: [], roles: ['tabpanel', 'region', 'log'], allowExpressionValues: true },
+      ],
       // CLAUDE.md rule 5: AI output (and anything else) is rendered as text, never HTML.
       'no-restricted-syntax': [
         'error',

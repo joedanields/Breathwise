@@ -136,9 +136,7 @@ export function LocationSearch({ onSelect, inputRef, describedBy }: LocationSear
         className="absolute z-10 mt-1 max-h-80 w-full overflow-auto rounded-md border border-border bg-surface py-1 shadow-lg"
       >
         {places.map((place, index) => (
-          // Keyboard selection happens on the combobox input (aria-activedescendant);
-          // options are pointer targets only, per the ARIA combobox pattern.
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- ARIA combobox: keys are handled on the input (aria-activedescendant); options are pointer targets only.
           <div
             key={place.id}
             id={optionId(place)}
