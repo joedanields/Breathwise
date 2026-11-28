@@ -3,6 +3,7 @@ import { Checkbox, CheckboxGroup, SelectField, TextField } from '@/components/ui
 import { ACTIVITY_OPTIONS, AGE_BAND_OPTIONS, CONDITION_OPTIONS, PERSONA_OPTIONS } from './labels';
 import {
   addMember,
+  type DraftErrors,
   type DraftFieldsProps,
   MAX_LABEL_LENGTH,
   type MemberDraft,
@@ -16,6 +17,9 @@ export function HouseholdFields({ idPrefix, draft, onChange, errors }: DraftFiel
       ...draft,
       members: draft.members.map((m, i) => (i === index ? { ...m, ...patch } : m)),
     });
+  };
+  const removeMember = (index: number) => {
+    onChange({ ...draft, members: draft.members.filter((_, i) => i !== index) });
   };
 
   return (
@@ -32,104 +36,28 @@ export function HouseholdFields({ idPrefix, draft, onChange, errors }: DraftFiel
           onChange({ ...draft, personas });
         }}
       />
-
       <ol className="space-y-6">
-        {draft.members.map((member, index) => {
-          const key = `member-${String(index)}`;
-          const name = member.label.trim() || `Person ${String(index + 1)}`;
-          return (
-            <li key={member.id} className="rounded-lg border border-border p-4">
-              <fieldset className="space-y-4">
-                <legend className="text-lg font-semibold">{name}</legend>
-                <TextField
-                  id={id(`${key}-label`)}
-                  label="Name or nickname"
-                  hint={`Shown only to you and in the plan. Up to ${String(MAX_LABEL_LENGTH)} characters.`}
-                  maxLength={MAX_LABEL_LENGTH + 10}
-                  value={member.label}
-                  error={errors[`${key}-label`]}
-                  onChange={(label) => {
-                    updateMember(index, { label });
-                  }}
-                />
-                <SelectField
-                  id={id(`${key}-ageBand`)}
-                  label="Age group"
-                  options={AGE_BAND_OPTIONS}
-                  value={member.ageBand}
-                  error={errors[`${key}-ageBand`]}
-                  onChange={(ageBand) => {
-                    updateMember(index, { ageBand });
-                  }}
-                />
-                <CheckboxGroup
-                  id={id(`${key}-conditions`)}
-                  legend="Health conditions"
-                  hint="Optional. Leave all unticked for none."
-                  options={CONDITION_OPTIONS}
-                  values={member.conditions}
-                  onChange={(conditions) => {
-                    updateMember(index, { conditions });
-                  }}
-                />
-                <Checkbox
-                  id={id(`${key}-hasActivity`)}
-                  label="Has a regular outdoor activity"
-                  checked={member.hasActivity}
-                  onChange={(hasActivity) => {
-                    updateMember(index, { hasActivity });
-                  }}
-                />
-                {member.hasActivity && (
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <SelectField
-                      id={id(`${key}-activityKind`)}
-                      label="Activity"
-                      options={ACTIVITY_OPTIONS}
-                      value={member.activityKind}
-                      error={errors[`${key}-activityKind`]}
-                      onChange={(activityKind) => {
-                        updateMember(index, { activityKind });
-                      }}
-                    />
-                    <TextField
-                      id={id(`${key}-activityStart`)}
-                      label="Usual start time"
-                      type="time"
-                      value={member.activityStart}
-                      error={errors[`${key}-activityStart`]}
-                      onChange={(activityStart) => {
-                        updateMember(index, { activityStart });
-                      }}
-                    />
-                    <TextField
-                      id={id(`${key}-activityDuration`)}
-                      label="Duration (minutes)"
-                      inputMode="numeric"
-                      value={member.activityDurationMin}
-                      error={errors[`${key}-activityDuration`]}
-                      onChange={(activityDurationMin) => {
-                        updateMember(index, { activityDurationMin });
-                      }}
-                    />
-                  </div>
-                )}
-                {draft.members.length > 1 && (
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      onChange({ ...draft, members: draft.members.filter((_, i) => i !== index) });
-                    }}
-                  >
-                    Remove {name}
-                  </Button>
-                )}
-              </fieldset>
-            </li>
-          );
-        })}
+        {draft.members.map((member, index) => (
+          <li key={member.id} className="rounded-lg border border-border p-4">
+            <MemberFieldset
+              fieldId={(field) => id(`member-${String(index)}-${field}`)}
+              errorFor={(field) => errors[`member-${String(index)}-${field}`]}
+              member={member}
+              name={member.label.trim() || `Person ${String(index + 1)}`}
+              onUpdate={(patch) => {
+                updateMember(index, patch);
+              }}
+              onRemove={
+                draft.members.length > 1
+                  ? () => {
+                      removeMember(index);
+                    }
+                  : undefined
+              }
+            />
+          </li>
+        ))}
       </ol>
-
       <Button
         variant="secondary"
         onClick={() => {
@@ -138,6 +66,122 @@ export function HouseholdFields({ idPrefix, draft, onChange, errors }: DraftFiel
       >
         Add person
       </Button>
+    </div>
+  );
+}
+
+interface MemberFieldsetProps {
+  /** Control id for a member field, e.g. "label" → "<prefix>-member-0-label". */
+  fieldId: (field: string) => string;
+  /** Validation message for a member field; keys match `validateHousehold`. */
+  errorFor: (field: string) => DraftErrors[string] | undefined;
+  member: MemberDraft;
+  name: string;
+  onUpdate: (patch: Partial<MemberDraft>) => void;
+  /** Absent when this is the only member (a household needs at least one). */
+  onRemove: (() => void) | undefined;
+}
+
+function MemberFieldset({
+  fieldId,
+  errorFor,
+  member,
+  name,
+  onUpdate,
+  onRemove,
+}: MemberFieldsetProps) {
+  return (
+    <fieldset className="space-y-4">
+      <legend className="text-lg font-semibold">{name}</legend>
+      <TextField
+        id={fieldId('label')}
+        label="Name or nickname"
+        hint={`Shown only to you and in the plan. Up to ${String(MAX_LABEL_LENGTH)} characters.`}
+        maxLength={MAX_LABEL_LENGTH + 10}
+        value={member.label}
+        error={errorFor('label')}
+        onChange={(label) => {
+          onUpdate({ label });
+        }}
+      />
+      <SelectField
+        id={fieldId('ageBand')}
+        label="Age group"
+        options={AGE_BAND_OPTIONS}
+        value={member.ageBand}
+        error={errorFor('ageBand')}
+        onChange={(ageBand) => {
+          onUpdate({ ageBand });
+        }}
+      />
+      <CheckboxGroup
+        id={fieldId('conditions')}
+        legend="Health conditions"
+        hint="Optional. Leave all unticked for none."
+        options={CONDITION_OPTIONS}
+        values={member.conditions}
+        onChange={(conditions) => {
+          onUpdate({ conditions });
+        }}
+      />
+      <Checkbox
+        id={fieldId('hasActivity')}
+        label="Has a regular outdoor activity"
+        checked={member.hasActivity}
+        onChange={(hasActivity) => {
+          onUpdate({ hasActivity });
+        }}
+      />
+      {member.hasActivity && (
+        <ActivityFields fieldId={fieldId} errorFor={errorFor} member={member} onUpdate={onUpdate} />
+      )}
+      {onRemove && (
+        <Button variant="secondary" onClick={onRemove}>
+          Remove {name}
+        </Button>
+      )}
+    </fieldset>
+  );
+}
+
+function ActivityFields({
+  fieldId,
+  errorFor,
+  member,
+  onUpdate,
+}: Pick<MemberFieldsetProps, 'fieldId' | 'errorFor' | 'member' | 'onUpdate'>) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-3">
+      <SelectField
+        id={fieldId('activityKind')}
+        label="Activity"
+        options={ACTIVITY_OPTIONS}
+        value={member.activityKind}
+        error={errorFor('activityKind')}
+        onChange={(activityKind) => {
+          onUpdate({ activityKind });
+        }}
+      />
+      <TextField
+        id={fieldId('activityStart')}
+        label="Usual start time"
+        type="time"
+        value={member.activityStart}
+        error={errorFor('activityStart')}
+        onChange={(activityStart) => {
+          onUpdate({ activityStart });
+        }}
+      />
+      <TextField
+        id={fieldId('activityDuration')}
+        label="Duration (minutes)"
+        inputMode="numeric"
+        value={member.activityDurationMin}
+        error={errorFor('activityDuration')}
+        onChange={(activityDurationMin) => {
+          onUpdate({ activityDurationMin });
+        }}
+      />
     </div>
   );
 }
