@@ -12,6 +12,7 @@ import {
   MAX_BODY_BYTES,
   RATE_LIMIT_PER_MINUTE,
 } from '../../shared/config';
+import { log } from '../../shared/log';
 
 interface KvNamespace {
   get(key: string): Promise<string | null>;
@@ -134,7 +135,7 @@ export function createHandler({ timeoutMs = GEMINI_TIMEOUT_MS }: { timeoutMs?: n
     if (limit) return fail('rate_limited', { 'Retry-After': limit === 'minute' ? '60' : '3600' });
     // 7–8. Gemini (timeout) + output validation + grounding guard
     if (!env.GEMINI_API_KEY) {
-      console.error('advise: GEMINI_API_KEY is not configured');
+      log.error('advise: GEMINI_API_KEY is not configured');
       return fail('upstream');
     }
     // An empty GEMINI_MODEL counts as unset.
@@ -144,7 +145,7 @@ export function createHandler({ timeoutMs = GEMINI_TIMEOUT_MS }: { timeoutMs?: n
     const outcome = await runAdvice(parsed.data, { apiKey: env.GEMINI_API_KEY, model, timeoutMs });
     if (!outcome.ok) {
       // Failures only, for diagnosis: no profile, no prompt, no key.
-      console.warn(
+      log.warn(
         JSON.stringify({
           route: 'advise',
           mode: parsed.data.mode,

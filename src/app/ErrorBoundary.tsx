@@ -1,4 +1,5 @@
 import { Component, useEffect, useRef, type ErrorInfo, type ReactNode } from 'react';
+import { log } from '@shared/log';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -18,7 +19,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   override componentDidCatch(error: Error, info: ErrorInfo): void {
     // Never swallow errors silently (CLAUDE.md). No third-party error reporting by design.
-    console.error('Breathwise UI error', error, info.componentStack);
+    log.error('Breathwise UI error', error, info.componentStack);
   }
 
   override render(): ReactNode {
