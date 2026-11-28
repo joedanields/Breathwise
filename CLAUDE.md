@@ -61,7 +61,7 @@ npm run test         # vitest run
 npm run test:watch   # vitest
 npm run test:cov     # vitest run --coverage
 npm run e2e          # playwright test
-npm run check        # lint + typecheck + test  (run before every commit)
+npm run check        # lint + format:check + typecheck + test  (run before every commit)
 ```
 
 ## Coding conventions
