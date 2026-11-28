@@ -65,6 +65,17 @@ CI was **red from `aff6850` (end of Phase 5) to `a43051b`**, although I reported
 3. gitleaks: two false positives (fake BYOK test keys) → `.gitleaksignore` with those two exact fingerprints.
 Cloudflare deploys were unaffected (they build independently of CI). From now on CI is checked with `gh run view --json conclusion`.
 
+## Code-quality and security passes (28 Nov, after the first evaluation)
+
+The first evaluation scored 96.96 overall, with Code Quality 89, Security 98, Accessibility 99 and 100 everywhere else. No behaviour changes:
+
+- Inline ESLint disables moved into a documented config; one justified disable remains (combobox option click).
+- `shared/log.ts` replaces raw `console` calls; it is silent under test and never logs profiles, prompts or keys.
+- Long functions split into small, named helpers: fallback plan, profile draft, advice engine (one typed retry loop, no casts), the `/api/advise` handler, facts snapshot, and the dashboard, onboarding, location search, household, day-and-home, plan, chat, live-AQI and own-key components. Pure logic was moved into tested modules (`dashboard/derive.ts`, `location/comboboxState.ts`).
+- TSDoc on every exported function and type in `src/lib` and `shared`; `format:check` is part of `npm run check`.
+- Security: `/api/advise` responses now carry their own hardening headers (Pages `_headers` does not apply to Functions); `CORP` and `X-Frame-Options` were added to the static headers; there is now a root `SECURITY.md`.
+- A `<noscript>` message.
+
 ## Open issues
 
 - Owner (manual): Lighthouse run (agent sandbox blocked it) and a screen-reader pass.
