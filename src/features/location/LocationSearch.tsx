@@ -1,4 +1,5 @@
 import { type KeyboardEvent, type RefObject, useId, useRef, useState } from 'react';
+import { nextActiveIndex, searchStatus } from './comboboxState';
 import { formatPlaceLabel, type Place } from './schemas';
 import { MIN_QUERY_LENGTH, usePlaceSearch } from './usePlaceSearch';
 
@@ -47,20 +48,16 @@ export function LocationSearch({ onSelect, inputRef, describedBy }: LocationSear
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    const count = places.length;
     switch (event.key) {
       case 'ArrowDown':
-        if (count === 0) return;
+      case 'ArrowUp': {
+        const next = nextActiveIndex(event.key, activeIndex, places.length, expanded);
+        if (next === null) return;
         event.preventDefault();
         setOpen(true);
-        setActiveIndex(!expanded || activeIndex >= count - 1 ? 0 : activeIndex + 1);
+        setActiveIndex(next);
         break;
-      case 'ArrowUp':
-        if (count === 0) return;
-        event.preventDefault();
-        setOpen(true);
-        setActiveIndex(!expanded || activeIndex <= 0 ? count - 1 : activeIndex - 1);
-        break;
+      }
       case 'Enter':
         if (activePlace) {
           event.preventDefault();
@@ -80,16 +77,7 @@ export function LocationSearch({ onSelect, inputRef, describedBy }: LocationSear
     }
   }
 
-  let status = '';
-  if (search.isSearching) status = 'Searching…';
-  else if (search.isError)
-    status = 'Search is unavailable right now. Check your connection and try again.';
-  else if (search.isEmpty) status = `No places in India match “${search.query}”.`;
-  else if (expanded) {
-    const noun = places.length === 1 ? 'place' : 'places';
-    status = `${String(places.length)} ${noun} found. Use the up and down arrows to choose.`;
-  }
-
+  const status = searchStatus({ ...search, placeCount: places.length }, expanded);
   const describedByIds = [hintId, statusId, describedBy].filter(Boolean).join(' ');
 
   return (
