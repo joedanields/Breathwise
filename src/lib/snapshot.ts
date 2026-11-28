@@ -139,16 +139,94 @@ export function buildFactsSnapshot(input: SnapshotInput): FactsSnapshot {
     : null;
   const ventilate = findVentilationWindows(pm25, windByTime, { fromIndex });
 
+  return {
+    version: 1,
+    generatedAt: isoAtOffsetOf(now, current.time),
+    location: {
+      name: location.label,
+      ...(location.state ? { state: location.state } : {}),
+      latRounded: roundCoordinate(location.latitude),
+      lonRounded: roundCoordinate(location.longitude),
+      timezone: airQuality.timezone,
+    },
+    provenance: {
+      ...SNAPSHOT_PROVENANCE,
+      readingTime: current.time,
+      fetchedAt: input.fetchedAt,
+      isModelledEstimate: true,
+    },
+    current: currentReadings(current),
+    pm25Band: currentBand,
+    naqi: naqi && { ...naqi, isEstimate: true },
+    trend: computeTrend(hourly.pm25Ugm3, currentIndex),
+    weather: weather && weatherFacts(weather, hourly.time[currentIndex]),
+    windows: {
+      bestOutdoor: best.map(roundWindow),
+      ventilate: ventilate.map(roundWindow),
+      worst: worst.map(roundWindow),
+    },
+    memberRisk: computeMemberRisk(
+      profile.members,
+      naqi?.category ?? currentBand,
+      naqi ? 'naqi' : 'pm25_hourly',
+    ),
+    purifier: purifierFacts(profile.home),
+    impactFacts: commuteImpactFacts(profile.commute),
+    comparisons: windowComparisons(pm25, fromIndex, best[0], current.pm25Ugm3, profile.members),
+    profile,
+  };
+}
+
+/** Current pollutant readings, rounded, with CO converted to mg/m³. */
+function currentReadings(current: SnapshotAirQuality['current']): FactsSnapshot['current'] {
+  return {
+    pm25Ugm3: round(current.pm25Ugm3),
+    pm10Ugm3: round(current.pm10Ugm3),
+    no2Ugm3: round(current.no2Ugm3),
+    so2Ugm3: round(current.so2Ugm3),
+    o3Ugm3: round(current.o3Ugm3),
+    coMgm3: round(current.coUgm3 === null ? null : current.coUgm3 / CO_UGM3_PER_MGM3, 1),
+    usAqi: round(current.usAqi),
+    dustUgm3: round(current.dustUgm3),
+    uvIndex: round(current.uvIndex, 1),
+  };
+}
+
+/** Current weather plus rain chance and mixing height at the air-quality reading hour. */
+function weatherFacts(
+  weather: SnapshotWeather,
+  readingHour: string | undefined,
+): NonNullable<FactsSnapshot['weather']> {
+  const index = weather.hourly.time.indexOf(readingHour ?? '');
+  const atReadingHour = (series: readonly Num[]) => (index >= 0 ? (series[index] ?? null) : null);
+  return {
+    tempC: round(weather.current.temperatureC, 1),
+    humidityPct: round(weather.current.humidityPct),
+    windKmh: round(weather.current.windKmh, 1),
+    windDirDeg: round(weather.current.windDirDeg),
+    precipProbPct: round(atReadingHour(weather.hourly.precipProbPct)),
+    boundaryLayerHeightM: round(atReadingHour(weather.hourly.boundaryLayerHeightM)),
+  };
+}
+
+/** How much cleaner W1 is than now and than each member's usual activity time. */
+function windowComparisons(
+  pm25: HourlyPm25,
+  fromIndex: number,
+  w1: { avgPm25Ugm3: number } | undefined,
+  currentPm25: Num,
+  members: HouseholdProfile['members'],
+): FactsSnapshot['comparisons'] {
+  if (!w1) return [];
   const comparisons: FactsSnapshot['comparisons'] = [];
-  const w1 = best[0];
-  if (w1 && current.pm25Ugm3 !== null && current.pm25Ugm3 > 0) {
+  if (currentPm25 !== null && currentPm25 > 0) {
     comparisons.push(
-      percentComparison('w1_vs_now', 'PM2.5 in W1', 'now', w1.avgPm25Ugm3, current.pm25Ugm3),
+      percentComparison('w1_vs_now', 'PM2.5 in W1', 'now', w1.avgPm25Ugm3, currentPm25),
     );
   }
-  for (const member of profile.members) {
+  for (const member of members) {
     const activity = member.outdoorActivity;
-    if (!w1 || !activity) continue;
+    if (!activity) continue;
     const usual = usualTimeAverage(
       pm25,
       fromIndex,
@@ -166,62 +244,5 @@ export function buildFactsSnapshot(input: SnapshotInput): FactsSnapshot {
       ),
     );
   }
-
-  const weatherIndex = weather ? weather.hourly.time.indexOf(hourly.time[currentIndex] ?? '') : -1;
-  const atWeatherHour = (series: readonly Num[]) =>
-    weatherIndex >= 0 ? (series[weatherIndex] ?? null) : null;
-
-  return {
-    version: 1,
-    generatedAt: isoAtOffsetOf(now, current.time),
-    location: {
-      name: location.label,
-      ...(location.state ? { state: location.state } : {}),
-      latRounded: roundCoordinate(location.latitude),
-      lonRounded: roundCoordinate(location.longitude),
-      timezone: airQuality.timezone,
-    },
-    provenance: {
-      ...SNAPSHOT_PROVENANCE,
-      readingTime: current.time,
-      fetchedAt: input.fetchedAt,
-      isModelledEstimate: true,
-    },
-    current: {
-      pm25Ugm3: round(current.pm25Ugm3),
-      pm10Ugm3: round(current.pm10Ugm3),
-      no2Ugm3: round(current.no2Ugm3),
-      so2Ugm3: round(current.so2Ugm3),
-      o3Ugm3: round(current.o3Ugm3),
-      coMgm3: round(current.coUgm3 === null ? null : current.coUgm3 / CO_UGM3_PER_MGM3, 1),
-      usAqi: round(current.usAqi),
-      dustUgm3: round(current.dustUgm3),
-      uvIndex: round(current.uvIndex, 1),
-    },
-    pm25Band: currentBand,
-    naqi: naqi && { ...naqi, isEstimate: true },
-    trend: computeTrend(hourly.pm25Ugm3, currentIndex),
-    weather: weather && {
-      tempC: round(weather.current.temperatureC, 1),
-      humidityPct: round(weather.current.humidityPct),
-      windKmh: round(weather.current.windKmh, 1),
-      windDirDeg: round(weather.current.windDirDeg),
-      precipProbPct: round(atWeatherHour(weather.hourly.precipProbPct)),
-      boundaryLayerHeightM: round(atWeatherHour(weather.hourly.boundaryLayerHeightM)),
-    },
-    windows: {
-      bestOutdoor: best.map(roundWindow),
-      ventilate: ventilate.map(roundWindow),
-      worst: worst.map(roundWindow),
-    },
-    memberRisk: computeMemberRisk(
-      profile.members,
-      naqi?.category ?? currentBand,
-      naqi ? 'naqi' : 'pm25_hourly',
-    ),
-    purifier: purifierFacts(profile.home),
-    impactFacts: commuteImpactFacts(profile.commute),
-    comparisons,
-    profile,
-  };
+  return comparisons;
 }
