@@ -21,6 +21,7 @@ import {
   SCHEMA_RETRY_NOTE,
 } from './prompt';
 import type { AdviceError, AdviceRequest } from './requestSchema';
+import type { FactsSnapshot } from '../types';
 
 /** Result of `runAdvice`: a validated plan or chat answer, or an error with a log-only reason. */
 export type AdviceOutcome =
@@ -61,61 +62,87 @@ function mapGeminiError(error: GeminiError): { error: AdviceError; reason: strin
   }
 }
 
-/** Calls Gemini, validates and grounds the output, and retries once on a schema or grounding failure. */
-export async function runAdvice(request: AdviceRequest, deps: AdviceDeps): Promise<AdviceOutcome> {
-  const allowed = allowedNumbers(request.snapshot);
-  let retryNote: string | undefined;
+/** How one advice mode (plan or chat) prompts Gemini and checks its output. */
+interface ModeSpec<T> {
+  systemPrompt: string;
+  responseJsonSchema: unknown;
+  userPrompt: (retryNote: string | undefined) => string;
+  normalise: (value: unknown) => unknown;
+  schema: z.ZodType<T>;
+  texts: (data: T) => string[];
+}
 
+type Validated<T> =
+  { ok: true; data: T; attempts: number } | { ok: false; error: AdviceError; reason: string };
+
+function planSpec(snapshot: FactsSnapshot): ModeSpec<AdvicePlan> {
+  return {
+    systemPrompt: PLAN_SYSTEM_PROMPT,
+    responseJsonSchema: PLAN_JSON_SCHEMA,
+    userPrompt: (retryNote) => buildPlanUserPrompt(snapshot, retryNote),
+    normalise: normalisePlan,
+    schema: AdvicePlanSchema,
+    texts: planTexts,
+  };
+}
+
+function chatSpec(request: Extract<AdviceRequest, { mode: 'chat' }>): ModeSpec<ChatAnswer> {
+  const { snapshot, question, history } = request;
+  return {
+    systemPrompt: CHAT_SYSTEM_PROMPT,
+    responseJsonSchema: CHAT_JSON_SCHEMA,
+    userPrompt: (retryNote) => buildChatUserPrompt(snapshot, question, history, retryNote),
+    normalise: normaliseChatAnswer,
+    schema: ChatAnswerSchema,
+    texts: chatTexts,
+  };
+}
+
+/** Prompt → Gemini → normalise → Zod → grounding guard, with one retry on a schema or grounding failure. */
+async function generateValidated<T>(
+  spec: ModeSpec<T>,
+  allowed: readonly number[],
+  deps: AdviceDeps,
+): Promise<Validated<T>> {
+  let retryNote: string | undefined;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const isPlan = request.mode === 'plan';
     const result = await callGemini({
       apiKey: deps.apiKey,
       model: deps.model,
-      systemPrompt: isPlan ? PLAN_SYSTEM_PROMPT : CHAT_SYSTEM_PROMPT,
-      userPrompt: isPlan
-        ? buildPlanUserPrompt(request.snapshot, retryNote)
-        : buildChatUserPrompt(request.snapshot, request.question, request.history, retryNote),
-      responseJsonSchema: isPlan ? PLAN_JSON_SCHEMA : CHAT_JSON_SCHEMA,
+      systemPrompt: spec.systemPrompt,
+      userPrompt: spec.userPrompt(retryNote),
+      responseJsonSchema: spec.responseJsonSchema,
       signal: deps.signal,
       ...(deps.fetchImpl ? { fetchImpl: deps.fetchImpl } : {}),
       ...(deps.timeoutMs ? { timeoutMs: deps.timeoutMs } : {}),
     });
     if (!result.ok) return { ok: false, ...mapGeminiError(result.error) };
 
-    const schema: z.ZodType<AdvicePlan | ChatAnswer> = isPlan ? AdvicePlanSchema : ChatAnswerSchema;
-    const parsed = schema.safeParse(
-      isPlan ? normalisePlan(result.value) : normaliseChatAnswer(result.value),
-    );
+    const parsed = spec.schema.safeParse(spec.normalise(result.value));
     if (!parsed.success) {
-      if (attempt < MAX_ATTEMPTS) {
-        retryNote = SCHEMA_RETRY_NOTE;
-        continue;
-      }
-      return { ok: false, error: 'invalid_output', reason: 'schema' };
+      if (attempt === MAX_ATTEMPTS) return { ok: false, error: 'invalid_output', reason: 'schema' };
+      retryNote = SCHEMA_RETRY_NOTE;
+      continue;
     }
-
-    const texts = isPlan
-      ? planTexts(parsed.data as AdvicePlan)
-      : chatTexts(parsed.data as ChatAnswer);
-    const ungrounded = ungroundedNumbers(texts, allowed);
-    if (ungrounded.length === 0) {
-      return isPlan
-        ? {
-            ok: true,
-            mode: 'plan',
-            data: parsed.data as AdvicePlan,
-            model: deps.model,
-            attempts: attempt,
-          }
-        : {
-            ok: true,
-            mode: 'chat',
-            data: parsed.data as ChatAnswer,
-            model: deps.model,
-            attempts: attempt,
-          };
-    }
+    const ungrounded = ungroundedNumbers(spec.texts(parsed.data), allowed);
+    if (ungrounded.length === 0) return { ok: true, data: parsed.data, attempts: attempt };
     retryNote = groundingRetryNote(ungrounded);
   }
   return { ok: false, error: 'invalid_output', reason: 'grounding' };
+}
+
+/** Calls Gemini, validates and grounds the output, and retries once on a schema or grounding failure. */
+export async function runAdvice(request: AdviceRequest, deps: AdviceDeps): Promise<AdviceOutcome> {
+  const allowed = allowedNumbers(request.snapshot);
+  const { model } = deps;
+  if (request.mode === 'plan') {
+    const plan = await generateValidated(planSpec(request.snapshot), allowed, deps);
+    return plan.ok
+      ? { ok: true, mode: 'plan', data: plan.data, model, attempts: plan.attempts }
+      : plan;
+  }
+  const chat = await generateValidated(chatSpec(request), allowed, deps);
+  return chat.ok
+    ? { ok: true, mode: 'chat', data: chat.data, model, attempts: chat.attempts }
+    : chat;
 }
