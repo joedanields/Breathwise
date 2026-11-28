@@ -1,7 +1,13 @@
 import { delay, http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { geminiUrl } from '@shared/advice/gemini';
-import { createHandler, type Env, isAllowedOrigin, onRequest } from '../../../functions/api/advise';
+import {
+  API_SECURITY_HEADERS,
+  createHandler,
+  type Env,
+  isAllowedOrigin,
+  onRequest,
+} from '../../../functions/api/advise';
 import { server } from '../../msw/server';
 import { samplePlan, sampleSnapshot } from '../../utils/advice';
 
@@ -83,6 +89,19 @@ describe('origin rules', () => {
 describe('/api/advise checks (SECURITY.md §3)', () => {
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it('sets the API hardening headers on success and error responses', async () => {
+    geminiReturns(samplePlan());
+    const ok = (await call(post(planBody()))).response;
+    const forbidden = (await call(post(planBody(), { Origin: 'https://evil.com' }))).response;
+    for (const response of [ok, forbidden]) {
+      for (const [name, value] of Object.entries(API_SECURITY_HEADERS)) {
+        expect(response.headers.get(name)).toBe(value);
+      }
+    }
+    expect(ok.headers.get('X-Content-Type-Options')).toBe('nosniff');
+    expect(ok.headers.get('Content-Security-Policy')).toContain("default-src 'none'");
   });
 
   it('405 for non-POST', async () => {

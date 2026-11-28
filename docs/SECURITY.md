@@ -46,11 +46,17 @@ IP from `request.headers.get('CF-Connecting-IP')`.
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=(), usb=()
   Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  X-Frame-Options: DENY
   Strict-Transport-Security: max-age=31536000; includeSubDomains
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 ```
+
+`X-Frame-Options: DENY` repeats `frame-ancestors 'none'` for older browsers.
+
+**API responses.** Pages does not apply `_headers` to Pages Function responses, so `functions/api/advise.ts` sets its own (`API_SECURITY_HEADERS`, unit-tested on success and error responses): `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Cross-Origin-Resource-Policy: same-origin`, `Strict-Transport-Security`, plus `Cache-Control: no-store`.
 
 If a library requires inline style attributes, add `'unsafe-inline'` to `style-src` **only**, and note why here. Never relax `script-src`.
 

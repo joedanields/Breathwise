@@ -47,12 +47,25 @@ const STATUS: Readonly<Record<AdviceError, number>> = {
   auth: 502,
 };
 
+/**
+ * Pages applies `public/_headers` to static assets only, not to Function responses,
+ * so the API sets its own hardening headers (SECURITY.md §4).
+ */
+export const API_SECURITY_HEADERS: Readonly<Record<string, string>> = {
+  'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'Cross-Origin-Resource-Policy': 'same-origin',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+};
+
 function json(body: unknown, status = 200, headers: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
+      ...API_SECURITY_HEADERS,
       ...headers,
     },
   });
