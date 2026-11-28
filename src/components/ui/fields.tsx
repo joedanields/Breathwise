@@ -153,12 +153,7 @@ function ChoiceFieldset({
   children,
 }: Omit<ChoiceGroupProps<string>, 'options'> & { children: ReactNode }) {
   return (
-    <fieldset
-      id={id}
-      tabIndex={-1}
-      {...a11yProps(id, hint, error)}
-      className="focus:outline-none"
-    >
+    <fieldset id={id} tabIndex={-1} {...a11yProps(id, hint, error)} className="focus:outline-none">
       <legend className="font-medium">{legend}</legend>
       {hint && <Hint id={`${id}-hint`} hint={hint} />}
       <div
