@@ -10,7 +10,7 @@ import type { SelectedLocation } from '@/features/location/types';
 import { useAppStores } from '@/features/profile/stores';
 import { WeatherStrip } from '@/features/weather/WeatherStrip';
 import { describeFetchError, FetchFailure } from '@/lib/http';
-import { forecastHours } from '@/lib/rules/timeline';
+import { maxPrecipProbNext12h, timelineFor } from './derive';
 import { HouseholdToday } from './HouseholdToday';
 import { useDashboardData } from './useDashboardData';
 
@@ -21,66 +21,25 @@ interface DashboardProps {
 
 /** Live dashboard (UI_UX.md §3.2). Works fully without AI. */
 export function Dashboard({ location, profile }: DashboardProps) {
-  const headingId = useId();
   const stores = useAppStores();
   const [changing, setChanging] = useState(false);
   const { airQuality, weather, snapshot, now } = useDashboardData(location, profile);
-
-  const timeline =
-    snapshot && airQuality.data
-      ? forecastHours(
-          {
-            time: airQuality.data.data.hourly.time,
-            pm25Ugm3: airQuality.data.data.hourly.pm25Ugm3,
-          },
-          airQuality.data.data.hourly.time.findLastIndex((t) => Date.parse(t) <= now.getTime()),
-          [
-            ...snapshot.windows.bestOutdoor,
-            ...snapshot.windows.ventilate,
-            ...snapshot.windows.worst,
-          ],
-        )
-      : [];
-
-  const maxPrecipProbPct = (() => {
-    const data = weather.data?.data;
-    if (!data) return null;
-    const from = data.hourly.time.findIndex((t) => Date.parse(t) > now.getTime());
-    const next = data.hourly.precipProbPct.slice(Math.max(0, from), Math.max(0, from) + 12);
-    const present = next.filter((v): v is number => v !== null);
-    return present.length > 0 ? Math.max(...present) : null;
-  })();
+  const weatherHourly = weather.data?.data.hourly;
+  const maxPrecipProbPct = weatherHourly ? maxPrecipProbNext12h(weatherHourly, now) : null;
 
   return (
     <div className="mt-8 space-y-6">
-      <section
-        aria-labelledby={headingId}
-        className="flex flex-wrap items-center justify-between gap-3"
-      >
-        <h2 id={headingId} className="text-xl font-semibold">
-          {location.label}
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="secondary"
-            aria-expanded={changing}
-            onClick={() => {
-              setChanging(!changing);
-            }}
-          >
-            Change location
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              void airQuality.refetch();
-              void weather.refetch();
-            }}
-          >
-            Refresh
-          </Button>
-        </div>
-      </section>
+      <DashboardHeader
+        label={location.label}
+        changing={changing}
+        onToggleChange={() => {
+          setChanging(!changing);
+        }}
+        onRefresh={() => {
+          void airQuality.refetch();
+          void weather.refetch();
+        }}
+      />
       {(changing || !location.nameAvailable) && (
         <LocationPicker
           onLocated={(next) => {
@@ -113,7 +72,10 @@ export function Dashboard({ location, profile }: DashboardProps) {
               maxPrecipProbPct={maxPrecipProbPct}
               failed={weather.isError}
             />
-            <ForecastTimeline hours={timeline} timeZone={snapshot.location.timezone} />
+            <ForecastTimeline
+              hours={timelineFor(snapshot, airQuality.data.data.hourly, now)}
+              timeZone={snapshot.location.timezone}
+            />
           </div>
           <div className="min-w-0 space-y-6">
             <PlanPanel snapshot={snapshot} />
@@ -123,6 +85,36 @@ export function Dashboard({ location, profile }: DashboardProps) {
         </div>
       )}
     </div>
+  );
+}
+
+interface DashboardHeaderProps {
+  label: string;
+  changing: boolean;
+  onToggleChange: () => void;
+  onRefresh: () => void;
+}
+
+/** Place name with the Change location and Refresh actions. */
+function DashboardHeader({ label, changing, onToggleChange, onRefresh }: DashboardHeaderProps) {
+  const headingId = useId();
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="flex flex-wrap items-center justify-between gap-3"
+    >
+      <h2 id={headingId} className="text-xl font-semibold">
+        {label}
+      </h2>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="secondary" aria-expanded={changing} onClick={onToggleChange}>
+          Change location
+        </Button>
+        <Button variant="secondary" onClick={onRefresh}>
+          Refresh
+        </Button>
+      </div>
+    </section>
   );
 }
 
