@@ -44,77 +44,90 @@ function ActionCard({ action, snapshot }: { action: AdviceAction; snapshot: Fact
   );
 }
 
+const PLAN_TABS = [
+  { value: 'routine', label: "Today's routine" },
+  { value: 'indoor', label: 'Indoor air' },
+  { value: 'impact', label: 'Impact & why' },
+] as const;
+
 function PlanBody({ plan, snapshot }: { plan: AdvicePlan; snapshot: FactsSnapshot }) {
   return (
     <>
       <h3 className="text-lg font-semibold">{plan.headline}</h3>
       <p className="mt-1">{plan.summary}</p>
-      <Tabs.Root defaultValue="routine" className="mt-4">
-        <Tabs.List
-          aria-label="Plan sections"
-          className="flex flex-wrap gap-2 border-b border-border"
-        >
-          {[
-            ['routine', "Today's routine"],
-            ['indoor', 'Indoor air'],
-            ['impact', 'Impact & why'],
-          ].map(([value, label]) => (
-            <Tabs.Trigger
-              key={value}
-              value={value ?? ''}
-              className="-mb-px min-h-11 border-b-2 border-transparent px-3 font-medium text-muted data-[state=active]:border-accent data-[state=active]:text-text"
-            >
-              {label}
-            </Tabs.Trigger>
-          ))}
-        </Tabs.List>
-        <Tabs.Content value="routine" className="mt-3 space-y-3">
-          {plan.routine.map((a) => (
-            <ActionCard key={a.id} action={a} snapshot={snapshot} />
-          ))}
-        </Tabs.Content>
-        <Tabs.Content value="indoor" className="mt-3 space-y-3">
-          {plan.indoor.map((a) => (
-            <ActionCard key={a.id} action={a} snapshot={snapshot} />
-          ))}
-        </Tabs.Content>
-        <Tabs.Content value="impact" className="mt-3 space-y-3">
-          {plan.impact.map((item) => (
-            <div key={item.title} className="rounded-md border border-border p-3">
-              <h4 className="font-semibold">{item.title}</h4>
-              <p className="mt-1">
-                <span className="font-medium">Health: </span>
-                {item.health}
-              </p>
-              {item.emissions && (
-                <p className="mt-1">
-                  <span className="font-medium">Emissions: </span>
-                  {item.emissions}
-                </p>
-              )}
-            </div>
-          ))}
-        </Tabs.Content>
-      </Tabs.Root>
-
-      {plan.memberNotes.length > 0 && (
-        <>
-          <h4 className="mt-4 font-semibold">For each person</h4>
-          <ul className="mt-1 list-disc space-y-1 pl-5">
-            {plan.memberNotes.map((n) => (
-              <li key={n.memberId}>
-                <span className="font-medium">{memberNames([n.memberId], snapshot)}: </span>
-                {n.note}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
+      <PlanTabs plan={plan} snapshot={snapshot} />
+      {plan.memberNotes.length > 0 && <MemberNotes plan={plan} snapshot={snapshot} />}
       <div className="mt-4 rounded-md border-2 border-aqi-poor p-3">
         <h4 className="font-semibold">Seek medical care if</h4>
         <p className="mt-1">{plan.seekCareIf}</p>
       </div>
+    </>
+  );
+}
+
+function PlanTabs({ plan, snapshot }: { plan: AdvicePlan; snapshot: FactsSnapshot }) {
+  return (
+    <Tabs.Root defaultValue="routine" className="mt-4">
+      <Tabs.List aria-label="Plan sections" className="flex flex-wrap gap-2 border-b border-border">
+        {PLAN_TABS.map(({ value, label }) => (
+          <Tabs.Trigger
+            key={value}
+            value={value}
+            className="-mb-px min-h-11 border-b-2 border-transparent px-3 font-medium text-muted data-[state=active]:border-accent data-[state=active]:text-text"
+          >
+            {label}
+          </Tabs.Trigger>
+        ))}
+      </Tabs.List>
+      <Tabs.Content value="routine" className="mt-3 space-y-3">
+        {plan.routine.map((a) => (
+          <ActionCard key={a.id} action={a} snapshot={snapshot} />
+        ))}
+      </Tabs.Content>
+      <Tabs.Content value="indoor" className="mt-3 space-y-3">
+        {plan.indoor.map((a) => (
+          <ActionCard key={a.id} action={a} snapshot={snapshot} />
+        ))}
+      </Tabs.Content>
+      <Tabs.Content value="impact" className="mt-3 space-y-3">
+        {plan.impact.map((item) => (
+          <ImpactCard key={item.title} item={item} />
+        ))}
+      </Tabs.Content>
+    </Tabs.Root>
+  );
+}
+
+function ImpactCard({ item }: { item: AdvicePlan['impact'][number] }) {
+  return (
+    <div className="rounded-md border border-border p-3">
+      <h4 className="font-semibold">{item.title}</h4>
+      <p className="mt-1">
+        <span className="font-medium">Health: </span>
+        {item.health}
+      </p>
+      {item.emissions && (
+        <p className="mt-1">
+          <span className="font-medium">Emissions: </span>
+          {item.emissions}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function MemberNotes({ plan, snapshot }: { plan: AdvicePlan; snapshot: FactsSnapshot }) {
+  return (
+    <>
+      <h4 className="mt-4 font-semibold">For each person</h4>
+      <ul className="mt-1 list-disc space-y-1 pl-5">
+        {plan.memberNotes.map((n) => (
+          <li key={n.memberId}>
+            <span className="font-medium">{memberNames([n.memberId], snapshot)}: </span>
+            {n.note}
+          </li>
+        ))}
+      </ul>
     </>
   );
 }
