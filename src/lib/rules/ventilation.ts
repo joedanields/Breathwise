@@ -6,6 +6,7 @@ import { type HourlyPm25, toTimeWindow, WINDOW_DEFAULTS } from './windows';
 /** AQI_AND_RULES.md §5: wind at or above this disperses pollution better. */
 export const WINDY_KMH = 8;
 
+/** Where and how far ahead to look for ventilation windows. */
 export interface VentilationSearch {
   fromIndex: number;
   horizonH?: number;

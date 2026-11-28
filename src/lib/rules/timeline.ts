@@ -5,6 +5,7 @@ import type { HourlyPm25 } from './windows';
 /** The forecast timeline shows the next 48 hours (UI_UX.md §3.2). */
 export const TIMELINE_HOURS = 48;
 
+/** One hour of the PM2.5 timeline with its NAQI band. */
 export interface TimelineHour {
   time: string;
   pm25Ugm3: number | null;

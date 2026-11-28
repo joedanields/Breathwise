@@ -19,7 +19,9 @@ export const AdviceRequestSchema = z.discriminatedUnion('mode', [
   }),
 ]);
 
+/** A validated /api/advise request body (plan or chat). */
 export type AdviceRequest = z.infer<typeof AdviceRequestSchema>;
+/** One earlier turn of the chat history. */
 export type ChatTurn = z.infer<typeof ChatTurnSchema>;
 
 export const ADVICE_ERRORS = [
@@ -33,6 +35,7 @@ export const ADVICE_ERRORS = [
   'method_not_allowed',
   'auth',
 ] as const;
+/** Error codes /api/advise can return. */
 export type AdviceError = (typeof ADVICE_ERRORS)[number];
 
 export const AdviceResponseSchema = z.union([
@@ -53,4 +56,5 @@ export const AdviceResponseSchema = z.union([
   z.strictObject({ ok: z.literal(false), error: z.enum(ADVICE_ERRORS) }),
 ]);
 
+/** An /api/advise response: the advice, or an error code. */
 export type AdviceResponse = z.infer<typeof AdviceResponseSchema>;

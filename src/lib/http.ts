@@ -3,6 +3,7 @@ import { err, ok, type Result } from './result';
 
 export const DEFAULT_TIMEOUT_MS = 10_000;
 
+/** Why a JSON fetch failed. */
 export type FetchError =
   | { kind: 'network'; message: string }
   | { kind: 'timeout' }
@@ -10,6 +11,7 @@ export type FetchError =
   | { kind: 'http'; status: number; reason?: string }
   | { kind: 'parse'; message: string };
 
+/** Abort signal and timeout for `fetchJson`. */
 export interface FetchJsonOptions {
   signal?: AbortSignal | undefined;
   timeoutMs?: number;
@@ -95,6 +97,7 @@ export class FetchFailure extends Error {
   }
 }
 
+/** Returns the value, or throws a `FetchFailure` for callers that expect thrown errors. */
 export function unwrapOrThrow<T>(result: Result<T, FetchError>): T {
   if (result.ok) return result.value;
   throw new FetchFailure(result.error);

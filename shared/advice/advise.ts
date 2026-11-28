@@ -22,11 +22,13 @@ import {
 } from './prompt';
 import type { AdviceError, AdviceRequest } from './requestSchema';
 
+/** Result of `runAdvice`: a validated plan or chat answer, or an error with a log-only reason. */
 export type AdviceOutcome =
   | { ok: true; mode: 'plan'; data: AdvicePlan; model: string; attempts: number }
   | { ok: true; mode: 'chat'; data: ChatAnswer; model: string; attempts: number }
   | { ok: false; error: AdviceError; reason: string };
 
+/** API key, model and transport options for `runAdvice`. */
 export interface AdviceDeps {
   apiKey: string;
   model: string;
@@ -59,6 +61,7 @@ function mapGeminiError(error: GeminiError): { error: AdviceError; reason: strin
   }
 }
 
+/** Calls Gemini, validates and grounds the output, and retries once on a schema or grounding failure. */
 export async function runAdvice(request: AdviceRequest, deps: AdviceDeps): Promise<AdviceOutcome> {
   const allowed = allowedNumbers(request.snapshot);
   let retryNote: string | undefined;

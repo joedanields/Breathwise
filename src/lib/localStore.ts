@@ -4,6 +4,7 @@ import { readStored, removeStored, writeStored } from './storage';
 /** Every key Breathwise writes starts with this, so "Clear all my data" can find them. */
 export const STORAGE_PREFIX = 'breathwise.';
 
+/** A Zod-validated localStorage value that components can subscribe to. */
 export interface LocalStore<T> {
   /** Current value; the same reference until it changes (for useSyncExternalStore). */
   get: () => T;

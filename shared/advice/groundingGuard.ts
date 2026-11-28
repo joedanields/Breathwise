@@ -79,6 +79,7 @@ export function ungroundedNumbers(texts: readonly string[], allowed: readonly nu
   return [...bad];
 }
 
+/** Every free-text field of a plan, for the grounding guard. */
 export function planTexts(plan: AdvicePlan): string[] {
   const actions = [...plan.routine, ...plan.indoor].flatMap((a) => [
     a.title,
@@ -96,6 +97,7 @@ export function planTexts(plan: AdvicePlan): string[] {
   ];
 }
 
+/** The free-text fields of a chat answer, for the grounding guard. */
 export function chatTexts(answer: ChatAnswer): string[] {
   return [answer.answer];
 }

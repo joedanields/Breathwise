@@ -52,7 +52,9 @@ export const AdvicePlanSchema = z.object({
   seekCareIf: z.string().min(1).max(200),
 });
 
+/** A validated daily plan (from the AI or the rules-based fallback). */
 export type AdvicePlan = z.infer<typeof AdvicePlanSchema>;
+/** One action in a plan's routine or indoor list. */
 export type AdviceAction = z.infer<typeof ActionSchema>;
 
 export const ChatAnswerSchema = z.object({
@@ -61,6 +63,7 @@ export const ChatAnswerSchema = z.object({
   outOfScope: z.boolean(),
 });
 
+/** A validated chat answer. */
 export type ChatAnswer = z.infer<typeof ChatAnswerSchema>;
 
 /**
@@ -155,6 +158,7 @@ export function normalisePlan(value: unknown): unknown {
   };
 }
 
+/** Clips an over-long chat answer before validation, like `normalisePlan`. */
 export function normaliseChatAnswer(value: unknown): unknown {
   const answer = asRecord(value);
   if (!answer) return value;

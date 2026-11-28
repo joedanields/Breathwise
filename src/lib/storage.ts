@@ -14,6 +14,7 @@ export function getLocalStorage(): Storage | undefined {
   }
 }
 
+/** sessionStorage, or undefined when the browser blocks it. */
 export function getSessionStorage(): Storage | undefined {
   try {
     return window.sessionStorage;
@@ -22,6 +23,7 @@ export function getSessionStorage(): Storage | undefined {
   }
 }
 
+/** Reads and Zod-validates a stored JSON value; removes it and returns null when invalid. */
 export function readStored<S extends z.ZodType>(
   storage: Storage | undefined,
   key: string,
@@ -40,6 +42,7 @@ export function readStored<S extends z.ZodType>(
   return null;
 }
 
+/** Stores a value as JSON; false when storage is unavailable or full. */
 export function writeStored(storage: Storage | undefined, key: string, value: unknown): boolean {
   if (!storage) return false;
   try {
@@ -50,6 +53,7 @@ export function writeStored(storage: Storage | undefined, key: string, value: un
   }
 }
 
+/** Removes a key, ignoring storage errors. */
 export function removeStored(storage: Storage | undefined, key: string): void {
   try {
     storage?.removeItem(key);

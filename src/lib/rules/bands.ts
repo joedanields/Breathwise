@@ -13,6 +13,7 @@ export function pm25Band(pm25Ugm3: number | null): NaqiCategory | null {
   return index === null ? null : categoryForIndex(index);
 }
 
+/** Maps hourly PM2.5 values to NAQI bands (null where data is missing). */
 export function hourlyPm25Bands(values: readonly (number | null)[]): (NaqiCategory | null)[] {
   return values.map(pm25Band);
 }

@@ -3,8 +3,10 @@ import type { Averages } from './averages';
 import { O3_ONE_HOUR_SWITCH_UGM3, POLLUTANTS, subIndex } from './breakpoints';
 import { categoryForIndex } from './categories';
 
+/** The pollutant averages `computeNaqi` works from. */
 export type PollutantAverages = Averages;
 
+/** India NAQI value, category and dominant pollutant. */
 export interface NaqiResult {
   value: number;
   category: NaqiCategory;

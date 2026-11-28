@@ -95,15 +95,18 @@ function factsBlock(snapshot: FactsSnapshot): string {
 export const SCHEMA_RETRY_NOTE =
   'Your previous answer did not match the required JSON shape. Return JSON only, with every required field, at most 6 routine and 6 indoor actions, and short text.';
 
+/** Retry instruction listing the numbers that were not in FACTS. */
 export function groundingRetryNote(numbers: readonly number[]): string {
   return `Your previous answer contained numbers not in FACTS: [${numbers.join(', ')}]. Remove or replace them with qualitative wording.`;
 }
 
+/** User prompt for a plan: the FACTS block, the task and any retry note. */
 export function buildPlanUserPrompt(snapshot: FactsSnapshot, retryNote?: string): string {
   const task = "Task: Produce today's Breathwise plan for this household.";
   return [factsBlock(snapshot), task, retryNote].filter(Boolean).join('\n\n');
 }
 
+/** User prompt for chat: FACTS, recent history and the delimited question. */
 export function buildChatUserPrompt(
   snapshot: FactsSnapshot,
   question: string,

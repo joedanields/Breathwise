@@ -1,3 +1,4 @@
+/** Direction of the PM2.5 trend. */
 export type Trend = 'rising' | 'falling' | 'steady';
 
 /** AQI_AND_RULES.md §3: a change beyond ±10 % is a trend. Exactly 10 % is steady. */

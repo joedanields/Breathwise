@@ -2,12 +2,14 @@ import type { NaqiCategory, TimeWindow } from '@shared/types';
 import { addHoursKeepingOffset, localHour } from '../time';
 import { pm25Band } from './bands';
 
+/** Hourly PM2.5 values with matching ISO times. */
 export interface HourlyPm25 {
   /** ISO times with the location's offset, one per hour. */
   readonly time: readonly string[];
   readonly pm25Ugm3: readonly (number | null)[];
 }
 
+/** Where and how far ahead to look for best and worst outdoor windows. */
 export interface WindowSearch {
   /** First hourly index a window may start at (the next full hour). */
   fromIndex: number;
@@ -83,6 +85,7 @@ function pickSeparated(
   return picked;
 }
 
+/** Builds a labelled TimeWindow of `durationH` hours starting at `startIndex`. */
 export function toTimeWindow(
   hourly: HourlyPm25,
   startIndex: number,

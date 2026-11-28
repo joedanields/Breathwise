@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { GEMINI_BASE_URL, GEMINI_TIMEOUT_MS, MAX_OUTPUT_TOKENS, TEMPERATURE } from '../config';
 
+/** Why a Gemini call failed. */
 export type GeminiError =
   | { kind: 'timeout' }
   | { kind: 'aborted' }
@@ -13,10 +14,12 @@ export type GeminiError =
   | { kind: 'blocked'; reason: string }
   | { kind: 'invalid_json' };
 
+/** Gemini's parsed JSON output with token usage, or an error. */
 export type GeminiResult =
   | { ok: true; value: unknown; usage: { promptTokens?: number; outputTokens?: number } }
   | { ok: false; error: GeminiError };
 
+/** Inputs for one Gemini generateContent call. */
 export interface GeminiCall {
   apiKey: string;
   model: string;
@@ -52,6 +55,7 @@ const GeminiResponseSchema = z.object({
     .optional(),
 });
 
+/** The generateContent endpoint for a model. */
 export function geminiUrl(model: string): string {
   return `${GEMINI_BASE_URL}/${encodeURIComponent(model)}:generateContent`;
 }
@@ -67,6 +71,7 @@ function parseJsonText(text: string): unknown {
 
 const TIMEOUT = Symbol('timeout');
 
+/** Calls Gemini once with a timeout and returns its parsed JSON output. */
 export async function callGemini({
   apiKey,
   model,

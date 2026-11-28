@@ -47,6 +47,7 @@ export interface SnapshotWeather {
   };
 }
 
+/** Everything `buildFactsSnapshot` needs: live data, fetch time, profile and location. */
 export interface SnapshotInput {
   airQuality: SnapshotAirQuality;
   /** When this browser fetched the air-quality data (ISO). */
@@ -91,6 +92,7 @@ function usualTimeAverage(hourly: HourlyPm25, fromIndex: number, hour: number, d
   return null;
 }
 
+/** A comparison fact saying how much lower or higher `value` is than `ref`, in whole percent. */
 export function percentComparison(
   id: string,
   subject: string,

@@ -17,6 +17,7 @@ export const HUMID_PCT = 80;
 export const RAIN_LIKELY_PCT = 50;
 export const LOW_MIXING_HEIGHT_M = 300;
 
+/** Up to two plain-language sentences on how the weather affects pollution, most important first. */
 export function weatherContext({
   windKmh,
   humidityPct,

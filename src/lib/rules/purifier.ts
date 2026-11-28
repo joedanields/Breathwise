@@ -4,6 +4,7 @@ import type { HouseholdProfile } from '@shared/types';
 export const DEFAULT_CEILING_HEIGHT_M = 2.8;
 export const TARGET_ACH = 5;
 
+/** Purifier facts for the snapshot: room size, air changes per hour and the CADR needed. */
 export interface PurifierFacts {
   has: boolean;
   roomM2: number | null;

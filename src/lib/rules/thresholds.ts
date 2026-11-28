@@ -42,6 +42,7 @@ export function sensitivityReasons(member: Member): string[] {
   return [...reasons, ...member.conditions.map((condition) => `condition:${condition}`)];
 }
 
+/** True when the member's age or health conditions make them sensitive to pollution. */
 export function isSensitive(member: Member): boolean {
   return sensitivityReasons(member).length > 0;
 }

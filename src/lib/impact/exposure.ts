@@ -28,6 +28,7 @@ export const IN_TRANSIT_EXPOSURE_RATIO: Readonly<Record<CommuteMode, number | nu
 /** Cars by AC use (E): AC car −50 % (0.5×), open-window car +30 % (1.3×). */
 export const CAR_EXPOSURE_RATIO = { ac_closed: 0.5, windows_open: 1.3 } as const;
 
+/** How a car is driven: AC on with windows closed, or windows open. */
 export type CarAc = keyof typeof CAR_EXPOSURE_RATIO;
 
 /** In-transit ratio for a mode; cars use the AC setting and are null when it's unknown. */

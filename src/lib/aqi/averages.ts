@@ -33,6 +33,7 @@ export interface AqHourly {
   readonly coUgm3: readonly (number | null)[];
 }
 
+/** One pollutant's trailing average over its NAQI averaging window. */
 export interface PollutantAverage {
   /** µg/m³, except CO in mg/m³. `null` when there are too few valid hours. */
   value: number | null;
@@ -62,11 +63,13 @@ export function trailingMean(
   return { value: sum / window.length, validHours: window.length };
 }
 
+/** Trailing averages for every pollutant, plus the latest-hour O3. */
 export type Averages = Record<Pollutant, PollutantAverage> & {
   /** O3 at the current hour, for the Table 3.11 footnote (O3 > 208 µg/m³). */
   o3LatestHourUgm3: number | null;
 };
 
+/** Computes each pollutant's NAQI trailing average ending at hourly index `endIndex`. */
 export function computeAverages(hourly: AqHourly, endIndex: number): Averages {
   const average = (pollutant: Pollutant, values: readonly (number | null)[]): PollutantAverage => {
     const { hours, minValid } = AVERAGING[pollutant];

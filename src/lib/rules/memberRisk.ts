@@ -1,6 +1,7 @@
 import type { Member, NaqiCategory, RiskLevel } from '@shared/types';
 import { OUTDOOR_GUIDANCE, RISK_BY_CATEGORY, sensitivityReasons } from './thresholds';
 
+/** A member's risk level today and the reasons for it. */
 export interface MemberRisk {
   memberId: string;
   level: RiskLevel;
