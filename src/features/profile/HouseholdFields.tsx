@@ -3,22 +3,13 @@ import { Checkbox, CheckboxGroup, SelectField, TextField } from '@/components/ui
 import { ACTIVITY_OPTIONS, AGE_BAND_OPTIONS, CONDITION_OPTIONS, PERSONA_OPTIONS } from './labels';
 import {
   addMember,
-  type DraftErrors,
+  type DraftFieldsProps,
   MAX_LABEL_LENGTH,
   type MemberDraft,
-  type ProfileDraft,
 } from './profileDraft';
 
-interface FieldsProps {
-  /** Prefix for control ids, unique per form. */
-  idPrefix: string;
-  draft: ProfileDraft;
-  onChange: (draft: ProfileDraft) => void;
-  errors: DraftErrors;
-}
-
 /** "Who's at home?" (UI_UX.md §3.1 step 2): personas and members. */
-export function HouseholdFields({ idPrefix, draft, onChange, errors }: FieldsProps) {
+export function HouseholdFields({ idPrefix, draft, onChange, errors }: DraftFieldsProps) {
   const id = (key: string) => `${idPrefix}-${key}`;
   const updateMember = (index: number, patch: Partial<MemberDraft>) => {
     onChange({

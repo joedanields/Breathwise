@@ -50,6 +50,15 @@ export interface ProfileDraft {
 /** Field id -> message. Ids match the form controls' ids. */
 export type DraftErrors = Record<string, string>;
 
+/** Props shared by the profile field groups (HouseholdFields, DayHomeFields). */
+export interface DraftFieldsProps {
+  /** Prefix for control ids, unique per form. */
+  idPrefix: string;
+  draft: ProfileDraft;
+  onChange: (draft: ProfileDraft) => void;
+  errors: DraftErrors;
+}
+
 export const MAX_LABEL_LENGTH = 30;
 
 function emptyMember(id: string): MemberDraft {
